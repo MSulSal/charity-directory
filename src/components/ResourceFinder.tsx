@@ -437,14 +437,14 @@ export function ResourceFinder({
 
       <div className="dark-panel overflow-hidden p-0">
         <div className="relative h-[34rem] sm:h-[40rem] lg:h-[44rem]">
-          <div className="absolute inset-0 bg-[var(--color-surface-2)]">
+          <div className="absolute inset-0 z-0 bg-[var(--color-surface-2)]">
             <div ref={mapContainerRef} className="h-full w-full" />
           </div>
 
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
 
           <form
-            className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between"
+            className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between"
             onSubmit={applySearch}
           >
             <div className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5">
@@ -615,7 +615,7 @@ export function ResourceFinder({
           </form>
 
           {!hasSearched ? (
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
               <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                 Enter a city, state, or ZIP and press Find Resources.
               </p>
@@ -623,7 +623,7 @@ export function ResourceFinder({
           ) : null}
 
           {hasSearched && !locationCenter ? (
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
               <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                 No location match found. Try a nearby city, state, or ZIP.
               </p>
@@ -631,7 +631,7 @@ export function ResourceFinder({
           ) : null}
 
           {mapError ? (
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
               <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                 {mapError}
               </p>
