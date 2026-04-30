@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SiteShell } from "@/components/layout/SiteShell";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

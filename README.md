@@ -22,13 +22,13 @@ The core user intent supported in this version:
 1. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Start the dev server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 3. Open:
@@ -38,21 +38,14 @@ npm run dev
 ### Production checks
 
 ```bash
-npm run lint
-npm run build
+pnpm lint
+pnpm build
 ```
 
 ## Environment Variables
 
-Optional map embed support:
-
-```bash
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
-```
-
-You can copy `.env.example` to `.env.local` and fill the value.
-
-If the key is missing, charity profiles show a styled map placeholder plus a "View on Google Maps" external link.
+No map API key is required in the current build.  
+Maps are rendered with Leaflet.js + OpenStreetMap tiles.
 
 ## Current Features
 
@@ -65,7 +58,7 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
   - `/resource-finder`
   - Enter location and radius to find nearby charities
   - Filter by subcategory, ways to help, verified/listed, service scope, and population served
-  - Visual map panel with plotted result markers (no API key required)
+  - Full-width Leaflet map panel with plotted result markers (no API key required)
   - Compact matched-organization list focused on map/routing context
 - Charity search results:
   - `/charities`
@@ -82,7 +75,7 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
   - Contact info, website, donation portal, donation FAQ, volunteer link
   - Verification/watchdog badges as structured fields
   - EIN, 501(c)(3) status field, Form 990 field
-  - Social links, map preview, and related charities
+  - Social links, Leaflet location map, and related charities
 - Reusable component architecture:
   - `Hero`, `SearchBar`, `AudienceActionChips`
   - `ResourceFinder`

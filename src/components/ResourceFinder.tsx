@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import {
   resolveLocationQuery,
-  toRelativeMarkerPosition,
   withDistanceFrom,
 } from "@/lib/geo";
 import type {
@@ -33,127 +32,6 @@ interface ResourceFinderProps {
 
 const radiusOptions = [5, 10, 25, 50, 100, 250, 500];
 
-interface MapLatLngLiteral {
-  lat: number;
-  lng: number;
-}
-
-interface GoogleMapOptions {
-  center: MapLatLngLiteral;
-  zoom: number;
-  mapTypeControl: boolean;
-  streetViewControl: boolean;
-  fullscreenControl: boolean;
-}
-
-interface GoogleMapInstance {
-  setCenter(center: MapLatLngLiteral): void;
-  setZoom(zoom: number): void;
-  fitBounds(bounds: GoogleLatLngBoundsInstance): void;
-}
-
-interface GoogleMarkerOptions {
-  map: GoogleMapInstance;
-  position: MapLatLngLiteral;
-  title?: string;
-  icon?: {
-    path: unknown;
-    scale: number;
-    fillColor: string;
-    fillOpacity: number;
-    strokeColor: string;
-    strokeWeight: number;
-  };
-}
-
-interface GoogleMarkerInstance {
-  setMap(map: GoogleMapInstance | null): void;
-  addListener(eventName: string, handler: () => void): void;
-}
-
-interface GoogleInfoWindowInstance {
-  setContent(content: string): void;
-  open(options: {
-    map: GoogleMapInstance;
-    anchor: GoogleMarkerInstance;
-    shouldFocus?: boolean;
-  }): void;
-}
-
-interface GoogleLatLngBoundsInstance {
-  extend(latLng: MapLatLngLiteral): void;
-}
-
-interface GoogleMapsNamespace {
-  Map: new (element: HTMLElement, options: GoogleMapOptions) => GoogleMapInstance;
-  Marker: new (options: GoogleMarkerOptions) => GoogleMarkerInstance;
-  InfoWindow: new () => GoogleInfoWindowInstance;
-  LatLngBounds: new () => GoogleLatLngBoundsInstance;
-  SymbolPath: {
-    CIRCLE: unknown;
-  };
-}
-
-declare global {
-  interface Window {
-    google?: {
-      maps: GoogleMapsNamespace;
-    };
-    __charityDirectoryGoogleMapsPromise?: Promise<GoogleMapsNamespace>;
-  }
-}
-
-function loadGoogleMaps(apiKey: string): Promise<GoogleMapsNamespace> {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("Google Maps can only load in the browser."));
-  }
-
-  if (window.google?.maps) {
-    return Promise.resolve(window.google.maps);
-  }
-
-  if (window.__charityDirectoryGoogleMapsPromise) {
-    return window.__charityDirectoryGoogleMapsPromise;
-  }
-
-  window.__charityDirectoryGoogleMapsPromise = new Promise((resolve, reject) => {
-    const existingScript = document.querySelector(
-      "script[data-google-maps='charity-directory']",
-    ) as HTMLScriptElement | null;
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => {
-        if (window.google?.maps) {
-          resolve(window.google.maps);
-        } else {
-          reject(new Error("Google Maps API loaded without maps namespace."));
-        }
-      });
-      existingScript.addEventListener("error", () =>
-        reject(new Error("Failed to load Google Maps script.")),
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleMaps = "charity-directory";
-    script.onload = () => {
-      if (window.google?.maps) {
-        resolve(window.google.maps);
-      } else {
-        reject(new Error("Google Maps API loaded without maps namespace."));
-      }
-    };
-    script.onerror = () => reject(new Error("Failed to load Google Maps script."));
-    document.head.appendChild(script);
-  });
-
-  return window.__charityDirectoryGoogleMapsPromise;
-}
-
 function zoomForRadius(radiusMiles: number) {
   if (radiusMiles <= 5) return 12;
   if (radiusMiles <= 10) return 11;
@@ -174,49 +52,31 @@ function uniq(values: string[]) {
   return Array.from(new Set(values)).sort();
 }
 
-function escapeHtml(text: string) {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function buildDirectionsUrl(charity: CharityOrganization, originText: string) {
-  const params = new URLSearchParams({ api: "1", travelmode: "driving" });
-
+function buildMapUrl(charity: CharityOrganization) {
   if (
     charity.contact.latitude !== undefined &&
     charity.contact.longitude !== undefined
   ) {
-    params.set(
-      "destination",
-      `${charity.contact.latitude},${charity.contact.longitude}`,
-    );
-  } else {
-    const address = [
-      charity.contact.addressLine1,
-      charity.contact.city,
-      charity.contact.state,
-      charity.contact.postalCode,
-      charity.contact.country,
-    ]
-      .filter(Boolean)
-      .join(", ");
-
-    if (address) {
-      params.set("destination", address);
-    } else {
-      return null;
-    }
+    const lat = charity.contact.latitude;
+    const lon = charity.contact.longitude;
+    return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`;
   }
 
-  if (originText.trim()) {
-    params.set("origin", originText.trim());
+  const address = [
+    charity.contact.addressLine1,
+    charity.contact.city,
+    charity.contact.state,
+    charity.contact.postalCode,
+    charity.contact.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (!address) {
+    return null;
   }
 
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
+  return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
 }
 
 export function ResourceFinder({
@@ -234,7 +94,6 @@ export function ResourceFinder({
   initialPopulationServed = "",
   showOpenPageLink = false,
 }: ResourceFinderProps) {
-  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const hasInitialSearch = initialLocation.trim().length > 0;
 
   const [query, setQuery] = useState(initialQuery);
@@ -264,9 +123,9 @@ export function ResourceFinder({
   const [mapError, setMapError] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const googleMapRef = useRef<GoogleMapInstance | null>(null);
-  const googleMarkersRef = useRef<GoogleMarkerInstance[]>([]);
-  const infoWindowRef = useRef<GoogleInfoWindowInstance | null>(null);
+  const mapRef = useRef<import("leaflet").Map | null>(null);
+  const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
 
   const categoryMap = useMemo(
     () =>
@@ -407,147 +266,120 @@ export function ResourceFinder({
     [filtered],
   );
 
-  const fallbackMarkers = useMemo(() => {
-    if (!locationCenter) {
-      return [] as Array<{ id: string; x: number; y: number; name: string; distance: number }>;
-    }
-
-    return mappableResults.slice(0, 40).map(({ charity, distanceMiles }) => {
-      const position = toRelativeMarkerPosition(
-        locationCenter,
-        {
-          latitude: charity.contact.latitude as number,
-          longitude: charity.contact.longitude as number,
-          label: charity.name,
-        },
-        activeRadiusMiles,
-      );
-
-      return {
-        id: charity.id,
-        x: position.x,
-        y: position.y,
-        name: charity.name,
-        distance: distanceMiles as number,
-      };
-    });
-  }, [activeRadiusMiles, locationCenter, mappableResults]);
-
   useEffect(() => {
-    if (!mapsApiKey || !mapContainerRef.current) {
+    if (!mapContainerRef.current || mapRef.current) {
       return;
     }
 
     let cancelled = false;
 
-    loadGoogleMaps(mapsApiKey)
-      .then((maps) => {
-        if (cancelled || !mapContainerRef.current || !maps) {
+    import("leaflet")
+      .then((L) => {
+        if (cancelled || !mapContainerRef.current) {
           return;
         }
 
+        leafletRef.current = L;
         setMapError(null);
 
-        const center =
-          hasSearched && locationCenter
-            ? { lat: locationCenter.latitude, lng: locationCenter.longitude }
-            : { lat: 39.5, lng: -98.35 };
-
-        if (!googleMapRef.current) {
-          googleMapRef.current = new maps.Map(mapContainerRef.current, {
-            center,
-            zoom: hasSearched && locationCenter ? zoomForRadius(activeRadiusMiles) : 4,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: true,
-          });
-          infoWindowRef.current = new maps.InfoWindow();
-        }
-
-        const map = googleMapRef.current;
-        map.setCenter(center);
-        map.setZoom(hasSearched && locationCenter ? zoomForRadius(activeRadiusMiles) : 4);
-
-        googleMarkersRef.current.forEach((marker) => marker.setMap(null));
-        googleMarkersRef.current = [];
-
-        const bounds = new maps.LatLngBounds();
-
-        if (hasSearched && locationCenter) {
-          bounds.extend(center);
-
-          const originMarker = new maps.Marker({
-            map,
-            position: center,
-            title: `Search center: ${locationCenter.label}`,
-            icon: {
-              path: maps.SymbolPath.CIRCLE,
-              scale: 7,
-              fillColor: "#E8BE4B",
-              fillOpacity: 1,
-              strokeColor: "#0D0A12",
-              strokeWeight: 1,
-            },
-          });
-
-          googleMarkersRef.current.push(originMarker);
-        }
-
-        mappableResults.slice(0, 80).forEach(({ charity, distanceMiles }) => {
-          const marker = new maps.Marker({
-            map,
-            position: {
-              lat: charity.contact.latitude as number,
-              lng: charity.contact.longitude as number,
-            },
-            title: charity.name,
-          });
-
-          marker.addListener("click", () => {
-            if (!infoWindowRef.current) {
-              return;
-            }
-
-            const distanceText =
-              distanceMiles === null
-                ? "Distance unavailable"
-                : `${distanceMiles.toFixed(1)} miles away`;
-
-            infoWindowRef.current.setContent(
-              `<div style="font-family:Arial,sans-serif;color:#0D0A12;font-size:13px;line-height:1.4;"><strong>${escapeHtml(charity.name)}</strong><br/>${escapeHtml(distanceText)}</div>`,
-            );
-
-            infoWindowRef.current.open({ map, anchor: marker, shouldFocus: false });
-          });
-
-          googleMarkersRef.current.push(marker);
-          bounds.extend({
-            lat: charity.contact.latitude as number,
-            lng: charity.contact.longitude as number,
-          });
+        const map = L.map(mapContainerRef.current, {
+          zoomControl: true,
+          attributionControl: true,
         });
 
-        if (hasSearched && locationCenter && mappableResults.length > 0) {
-          map.fitBounds(bounds);
-        }
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+          maxZoom: 19,
+        }).addTo(map);
+
+        map.setView([39.5, -98.35], 4);
+
+        mapRef.current = map;
+        markerLayerRef.current = L.layerGroup().addTo(map);
       })
       .catch(() => {
         if (!cancelled) {
-          setMapError(
-            "Google Maps failed to load. Check NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and key restrictions.",
-          );
+          setMapError("Leaflet map failed to load. Refresh and try again.");
         }
       });
 
     return () => {
       cancelled = true;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      markerLayerRef.current = null;
+      leafletRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    const markerLayer = markerLayerRef.current;
+
+    if (!L || !map || !markerLayer) {
+      return;
+    }
+
+    markerLayer.clearLayers();
+
+    if (!hasSearched || !locationCenter) {
+      map.setView([39.5, -98.35], 4);
+      return;
+    }
+
+    const centerLatLng = L.latLng(locationCenter.latitude, locationCenter.longitude);
+    const bounds = L.latLngBounds(centerLatLng, centerLatLng);
+
+    L.circleMarker(centerLatLng, {
+      radius: 7,
+      color: "#0D0A12",
+      weight: 1,
+      fillColor: "#E8BE4B",
+      fillOpacity: 1,
+    })
+      .addTo(markerLayer)
+      .bindTooltip(`Search center: ${locationCenter.label}`);
+
+    mappableResults.slice(0, 80).forEach(({ charity, distanceMiles }) => {
+      const markerLatLng = L.latLng(
+        charity.contact.latitude as number,
+        charity.contact.longitude as number,
+      );
+
+      bounds.extend(markerLatLng);
+
+      const distanceText =
+        distanceMiles === null
+          ? "Distance unavailable"
+          : `${distanceMiles.toFixed(1)} miles away`;
+
+      const categoryLabel = categoryMap.get(charity.categorySlug) ?? "Uncategorized";
+
+      L.circleMarker(markerLatLng, {
+        radius: 6,
+        color: "#E7E0D8",
+        weight: 1,
+        fillColor: "#8C6BC4",
+        fillOpacity: 0.95,
+      })
+        .addTo(markerLayer)
+        .bindTooltip(`${charity.name} • ${distanceText} • ${categoryLabel}`);
+    });
+
+    if (mappableResults.length > 0) {
+      map.fitBounds(bounds, { padding: [24, 24] });
+    } else {
+      map.setView(centerLatLng, zoomForRadius(activeRadiusMiles));
+    }
   }, [
     activeRadiusMiles,
+    categoryMap,
     hasSearched,
     locationCenter,
     mappableResults,
-    mapsApiKey,
   ]);
 
   function applySearch(event: React.FormEvent<HTMLFormElement>) {
@@ -605,37 +437,17 @@ export function ResourceFinder({
 
       <div className="dark-panel overflow-hidden p-0">
         <div className="relative h-[34rem] sm:h-[40rem] lg:h-[44rem]">
-          {mapsApiKey ? (
-            <div className="absolute inset-0 bg-[var(--color-surface-2)]">
-              <div ref={mapContainerRef} className="h-full w-full" />
-            </div>
-          ) : (
-            <div className="absolute inset-0 overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(180deg,#171125_0%,#100c19_100%)]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_28%,rgba(140,107,196,0.2)_0%,rgba(140,107,196,0)_58%)]" />
-              <div className="absolute left-1/2 top-1/2 h-[86%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
-              <div className="absolute left-1/2 top-1/2 h-[56%] w-[56%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
-              <div className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-saffron)]" />
-
-              {hasSearched && locationCenter
-                ? fallbackMarkers.map((marker) => (
-                    <div
-                      key={marker.id}
-                      title={`${marker.name} (${marker.distance.toFixed(1)} mi)`}
-                      className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-text-strong)] bg-[var(--color-soft-amethyst)]"
-                      style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-                    />
-                  ))
-                : null}
-            </div>
-          )}
+          <div className="absolute inset-0 bg-[var(--color-surface-2)]">
+            <div ref={mapContainerRef} className="h-full w-full" />
+          </div>
 
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
 
           <form
-            className="absolute inset-0 z-20 flex flex-col justify-between"
+            className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between"
             onSubmit={applySearch}
           >
-            <div className="border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5">
+            <div className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5">
               <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
                 <label className="text-xs text-[var(--color-text-muted)]">
                   <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
@@ -693,7 +505,7 @@ export function ResourceFinder({
               </p>
             </div>
 
-            <div className="space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
+            <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
               <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
                 <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
                   More filters
@@ -818,17 +630,11 @@ export function ResourceFinder({
             </div>
           ) : null}
 
-          {mapsApiKey && mapError ? (
+          {mapError ? (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
               <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                 {mapError}
               </p>
-            </div>
-          ) : null}
-
-          {!mapsApiKey ? (
-            <div className="absolute bottom-3 right-3 z-20 rounded border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-2 py-1 text-[10px] text-[var(--color-text-faint)]">
-              Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for live Google map pins
             </div>
           ) : null}
         </div>
@@ -857,7 +663,7 @@ export function ResourceFinder({
         ) : (
           <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
             {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
-              const directionsUrl = buildDirectionsUrl(charity, activeLocation);
+              const mapUrl = buildMapUrl(charity);
 
               return (
                 <li key={charity.id} className="space-y-2 p-3">
@@ -898,14 +704,14 @@ export function ResourceFinder({
                         Website
                       </a>
                     ) : null}
-                    {directionsUrl ? (
+                    {mapUrl ? (
                       <a
-                        href={directionsUrl}
+                        href={mapUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
                       >
-                        Directions
+                        Open map
                       </a>
                     ) : null}
                   </div>
