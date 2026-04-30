@@ -605,7 +605,7 @@ export function ResourceFinder({
     setMobileResultsView("map");
   }
 
-  const hasLocationInput = location.trim().length > 0;
+  const showResultsPanel = hasSearched && activeLocation.trim().length > 0;
 
   function renderResultsList() {
     if (!hasSearched) {
@@ -702,7 +702,7 @@ export function ResourceFinder({
       </header>
 
       <div className="dark-panel overflow-hidden p-0">
-        {hasLocationInput ? (
+        {showResultsPanel ? (
           <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
             <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
               <button
@@ -733,14 +733,14 @@ export function ResourceFinder({
 
         <div
           className={
-            hasLocationInput
+            showResultsPanel
               ? "lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
               : ""
           }
         >
           <div
             className={`relative h-[34rem] sm:h-[40rem] lg:h-[44rem] ${
-              hasLocationInput && mobileResultsView === "list" ? "hidden lg:block" : "block"
+              showResultsPanel && mobileResultsView === "list" ? "hidden lg:block" : "block"
             }`}
           >
             <div className="absolute inset-0 z-0 bg-[var(--color-surface-2)]">
@@ -754,7 +754,7 @@ export function ResourceFinder({
                 className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
                 onSubmit={applySearch}
               >
-                <div className="grid gap-3 lg:grid-cols-[1.1fr_170px_1fr_1fr_auto]">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.05fr)_160px_minmax(0,1fr)_minmax(0,1fr)_auto]">
                   <label className="text-xs text-[var(--color-text-muted)]">
                     <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
                     <input
@@ -804,7 +804,7 @@ export function ResourceFinder({
 
                   <button
                     type="submit"
-                    className="h-11 self-end border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
+                    className="h-11 border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95 md:col-span-2 xl:col-span-1 xl:self-end"
                   >
                     Find Resources
                   </button>
@@ -840,7 +840,7 @@ export function ResourceFinder({
                     More filters
                   </summary>
 
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     <label className="text-xs text-[var(--color-text-muted)]">
                       <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
                       <select
@@ -987,7 +987,7 @@ export function ResourceFinder({
             ) : null}
           </div>
 
-          {hasLocationInput ? (
+          {showResultsPanel ? (
             <aside
               className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/88%)] ${
                 mobileResultsView === "map" ? "hidden lg:flex" : "flex"
