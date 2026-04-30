@@ -443,11 +443,11 @@ export function ResourceFinder({
 
           <div className="pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
 
-          <form
-            className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between"
-            onSubmit={applySearch}
-          >
-            <div className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5">
+          <div className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between">
+            <form
+              className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
+              onSubmit={applySearch}
+            >
               <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
                 <label className="text-xs text-[var(--color-text-muted)]">
                   <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
@@ -503,7 +503,7 @@ export function ResourceFinder({
                     ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
                     : "Location not recognized. Try a nearby city, state, or ZIP."}
               </p>
-            </div>
+            </form>
 
             <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
               <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
@@ -612,7 +612,7 @@ export function ResourceFinder({
                 </div>
               </div>
             </div>
-          </form>
+          </div>
 
           {!hasSearched ? (
             <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
