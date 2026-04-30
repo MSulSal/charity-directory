@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
+import { useIsIOSMobile } from "@/hooks/useIsIOSMobile";
 import {
   geocodeLocationQuery,
   resolveLocationQuery,
   withDistanceFrom,
 } from "@/lib/geo";
 import type { GeoPoint } from "@/lib/geo";
+import { buildMapLinks } from "@/lib/mapLinks";
 import type {
   Category,
   CharityOrganization,
@@ -42,33 +44,6 @@ function isVetted(charity: CharityOrganization) {
 
 function uniq(values: string[]) {
   return Array.from(new Set(values)).sort();
-}
-
-function buildMapUrl(charity: CharityOrganization) {
-  if (
-    charity.contact.latitude !== undefined &&
-    charity.contact.longitude !== undefined
-  ) {
-    const lat = charity.contact.latitude;
-    const lon = charity.contact.longitude;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;
-  }
-
-  const address = [
-    charity.contact.addressLine1,
-    charity.contact.city,
-    charity.contact.state,
-    charity.contact.postalCode,
-    charity.contact.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  if (!address) {
-    return null;
-  }
-
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
 export function ResourceFinder({
@@ -120,6 +95,7 @@ export function ResourceFinder({
   const [hasSearched, setHasSearched] = useState(hasInitialSearch);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
+  const isIOSMobile = useIsIOSMobile();
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
@@ -746,7 +722,7 @@ export function ResourceFinder({
         ) : (
           <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
             {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
-              const mapUrl = buildMapUrl(charity);
+              const mapLinks = buildMapLinks(charity.contact, charity.name);
 
               return (
                 <li key={charity.id} className="space-y-2 p-3">
@@ -787,9 +763,28 @@ export function ResourceFinder({
                         Website
                       </a>
                     ) : null}
-                    {mapUrl ? (
+                    {mapLinks && isIOSMobile ? (
+                      <>
+                        <a
+                          href={mapLinks.apple}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                        >
+                          Apple Maps
+                        </a>
+                        <a
+                          href={mapLinks.google}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                        >
+                          Google Maps
+                        </a>
+                      </>
+                    ) : mapLinks ? (
                       <a
-                        href={mapUrl}
+                        href={mapLinks.google}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"

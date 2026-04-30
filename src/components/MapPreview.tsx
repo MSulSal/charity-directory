@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useIsIOSMobile } from "@/hooks/useIsIOSMobile";
 import { formatAddress } from "@/lib/format";
+import { buildMapLinks } from "@/lib/mapLinks";
 import type { ContactInfo } from "@/types/charity";
 
 interface MapPreviewProps {
@@ -11,27 +13,17 @@ interface MapPreviewProps {
   serviceArea: string;
 }
 
-function buildMapUrl(contact: ContactInfo, serviceArea: string) {
-  if (contact.latitude !== undefined && contact.longitude !== undefined) {
-    const lat = contact.latitude;
-    const lon = contact.longitude;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;
-  }
-
-  const fallback = formatAddress(contact) || serviceArea;
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fallback)}`;
-}
-
 export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
+  const isIOSMobile = useIsIOSMobile();
 
   const address = formatAddress(contact);
-  const mapUrl = useMemo(
-    () => buildMapUrl(contact, serviceArea),
+  const mapLinks = useMemo(
+    () => buildMapLinks(contact, serviceArea),
     [contact, serviceArea],
   );
 
@@ -144,14 +136,35 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
         ) : null}
       </div>
       <p className="text-xs text-[var(--color-text-faint)]">{address || serviceArea}</p>
-      <a
-        href={mapUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex w-fit border border-[var(--color-border)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-strong)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
-      >
-        View on Google Maps
-      </a>
+      {mapLinks && isIOSMobile ? (
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={mapLinks.apple}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit border border-[var(--color-border)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-strong)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
+          >
+            Open in Apple Maps
+          </a>
+          <a
+            href={mapLinks.google}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit border border-[var(--color-border)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-strong)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
+          >
+            Open in Google Maps
+          </a>
+        </div>
+      ) : mapLinks ? (
+        <a
+          href={mapLinks.google}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-fit border border-[var(--color-border)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-strong)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
+        >
+          View on Google Maps
+        </a>
+      ) : null}
     </section>
   );
 }
