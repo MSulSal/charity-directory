@@ -50,6 +50,7 @@ export function filterCharities(
         charity.serviceArea,
         charity.contact.city,
         charity.contact.state,
+        charity.contact.postalCode,
         charity.contact.country,
       ]
         .join(" ")

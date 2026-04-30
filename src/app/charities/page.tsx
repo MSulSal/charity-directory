@@ -1,64 +1,32 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
-interface LegacyCharitiesPageProps {
+import { CharityCatalog } from "@/components/CharityCatalog";
+import { categories, charities } from "@/data";
+import { filtersFromSearchParams } from "@/lib/filters";
+
+interface CharitiesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function firstValue(value: string | string[] | undefined) {
-  if (Array.isArray(value)) {
-    return value[0] || "";
-  }
+export const metadata: Metadata = {
+  title: "Search Charities",
+  description:
+    "Search charities and nonprofits by cause, location, trust filters, and ways to help.",
+};
 
-  return value || "";
-}
-
-export default async function LegacyCharitiesPage({
+export default async function CharitiesPage({
   searchParams,
-}: LegacyCharitiesPageProps) {
+}: CharitiesPageProps) {
   const resolved = await searchParams;
-  const params = new URLSearchParams();
+  const initialFilters = filtersFromSearchParams(resolved);
 
-  const query = firstValue(resolved.q);
-  const location = firstValue(resolved.location);
-  const way = firstValue(resolved.way) || firstValue(resolved.wayToHelp);
-  const verified = firstValue(resolved.verified);
-  const radius = firstValue(resolved.radius);
-  const subcategory = firstValue(resolved.subcategory);
-  const scale = firstValue(resolved.scale);
-  const population = firstValue(resolved.population);
-
-  if (query) {
-    params.set("q", query);
-  }
-
-  if (location) {
-    params.set("location", location);
-  }
-
-  if (way) {
-    params.set("way", way);
-  }
-
-  if (verified) {
-    params.set("verified", verified);
-  }
-
-  if (radius) {
-    params.set("radius", radius);
-  }
-
-  if (subcategory) {
-    params.set("subcategory", subcategory);
-  }
-
-  if (scale) {
-    params.set("scale", scale);
-  }
-
-  if (population) {
-    params.set("population", population);
-  }
-
-  const queryString = params.toString();
-  redirect(queryString ? `/resource-finder?${queryString}` : "/resource-finder");
+  return (
+    <CharityCatalog
+      charities={charities}
+      categories={categories}
+      initialFilters={initialFilters}
+      title="Charity Search Results"
+      description="Use the main search flow to explore charities with full profile card details. Filter by subcategory, location, ways to help, trust status, service scope, and population served."
+    />
+  );
 }

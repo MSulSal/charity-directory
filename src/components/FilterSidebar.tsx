@@ -60,7 +60,7 @@ export function FilterSidebar({
           type="text"
           value={filters.location}
           onChange={(event) => update("location", event.target.value)}
-          placeholder="City, state, or region"
+          placeholder="City, state, or ZIP"
           className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
         />
       </label>

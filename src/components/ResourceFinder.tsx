@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
-import { CharityCard } from "@/components/CharityCard";
 import {
   resolveLocationQuery,
   toRelativeMarkerPosition,
@@ -735,48 +734,80 @@ export function ResourceFinder({
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        {filtered.map(({ charity, distanceMiles }) => {
-          const directionsUrl = buildDirectionsUrl(charity, location);
-
-          return (
-            <div key={charity.id} className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-                <p className="text-xs text-[var(--color-text-faint)]">
-                  {distanceMiles === null
-                    ? "Distance unavailable"
-                    : `${distanceMiles.toFixed(1)} miles away`}
-                </p>
-                <div className="flex items-center gap-3">
-                  <p className="text-xs text-[var(--color-text-faint)]">
-                    {categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
-                  </p>
-                  {directionsUrl ? (
-                    <a
-                      href={directionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-[var(--color-text-muted)] underline underline-offset-2 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
-                    >
-                      Directions
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-
-              <CharityCard
-                charity={charity}
-                categoryName={categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
-              />
-            </div>
-          );
-        })}
+      <div className="dark-panel space-y-4 p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
+            Matching organizations
+          </h3>
+          <p className="text-xs text-[var(--color-text-faint)]">
+            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          </p>
+        </div>
 
         {filtered.length === 0 ? (
-          <div className="dark-panel col-span-full p-8 text-sm text-[var(--color-text-muted)]">
+          <p className="text-sm text-[var(--color-text-muted)]">
             No resources found with the current location, radius, and filter settings.
-          </div>
-        ) : null}
+          </p>
+        ) : (
+          <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
+            {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
+              const directionsUrl = buildDirectionsUrl(charity, location);
+
+              return (
+                <li key={charity.id} className="space-y-2 p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <Link
+                      href={`/charities/${charity.slug}`}
+                      className="text-sm font-semibold text-[var(--color-text-strong)] transition hover:text-[var(--color-soft-amethyst)]"
+                    >
+                      {charity.name}
+                    </Link>
+                    <p className="text-xs text-[var(--color-text-faint)]">
+                      {distanceMiles === null
+                        ? "Distance unavailable"
+                        : `${distanceMiles.toFixed(1)} miles away`}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    {categoryMap.get(charity.categorySlug) ?? "Uncategorized"} •{" "}
+                    {[charity.contact.city, charity.contact.state].filter(Boolean).join(", ")} •{" "}
+                    {charity.waysToHelp.join(", ")}
+                  </p>
+
+                  <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)]">
+                    <Link
+                      href={`/charities/${charity.slug}`}
+                      className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                    >
+                      View profile
+                    </Link>
+                    {charity.links.website ? (
+                      <a
+                        href={charity.links.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                      >
+                        Website
+                      </a>
+                    ) : null}
+                    {directionsUrl ? (
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                      >
+                        Directions
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </section>
   );

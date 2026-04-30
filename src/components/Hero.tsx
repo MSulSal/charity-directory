@@ -25,7 +25,7 @@ export function Hero() {
           </p>
         </div>
 
-        <SearchBar actionPath="/resource-finder" className="dark-panel border-[var(--color-border)]" />
+        <SearchBar actionPath="/charities" className="dark-panel border-[var(--color-border)]" />
 
         <div className="space-y-4">
           <p className="text-xs tracking-[0.15em] text-[var(--color-text-faint)] uppercase">Ways to act now</p>

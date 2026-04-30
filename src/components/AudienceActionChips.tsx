@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const actions = [
-  { label: "Donate", href: "/resource-finder?way=Donate" },
-  { label: "Volunteer", href: "/resource-finder?way=Volunteer" },
-  { label: "Get Help", href: "/resource-finder?way=Get+Help" },
-  { label: "Donate Goods", href: "/resource-finder?way=Goods" },
+  { label: "Donate", href: "/charities?way=Donate" },
+  { label: "Volunteer", href: "/charities?way=Volunteer" },
+  { label: "Get Help", href: "/charities?way=Get+Help" },
+  { label: "Donate Goods", href: "/charities?way=Goods" },
   { label: "Find Local Charities", href: "/resource-finder?radius=25" },
 ];
 

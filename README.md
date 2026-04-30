@@ -58,6 +58,7 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
 
 - Premium homepage with:
   - Hero copy, trust messaging, and search fields for "Charity, cause, or need" + location
+  - Main search routes to `/charities` for full charity result cards
   - Section flow: Hero -> Resource Finder -> Category Browser
   - Quick action chips: Donate, Volunteer, Get Help, Donate Goods, Find Local Charities
 - Resource Finder (map + radius search):
@@ -65,6 +66,11 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
   - Enter location and radius to find nearby charities
   - Filter by subcategory, ways to help, verified/listed, service scope, and population served
   - Visual map panel with plotted result markers (no API key required)
+  - Compact matched-organization list focused on map/routing context
+- Charity search results:
+  - `/charities`
+  - Full card-based results for regular directory search
+  - Filter by subcategory, location, ways to help, verified/listed, service scope, and population served
 - Category browsing:
   - `/categories`
   - `/categories/[slug]`
@@ -101,11 +107,8 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
 - `/resource-finder`
 - `/categories`
 - `/categories/[slug]`
+- `/charities`
 - `/charities/[slug]`
-
-Legacy route:
-
-- `/charities` redirects to `/resource-finder`
 
 Also includes placeholder utility pages linked in the footer:
 
