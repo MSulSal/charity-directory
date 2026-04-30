@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { MapLinkOptions } from "@/components/MapLinkOptions";
 import { formatAddress, formatDate } from "@/lib/format";
+import { buildMapLinks } from "@/lib/mapLinks";
 import type { Category, CharityOrganization, VerificationStatus } from "@/types/charity";
 
 interface CategoryDropdownExplorerProps {
@@ -49,6 +51,8 @@ function CharityExpandedCard({
   charity: CharityOrganization;
   categoryName: string;
 }) {
+  const mapLinks = buildMapLinks(charity.contact, charity.name);
+
   return (
     <article className="dark-panel-soft space-y-4 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -121,6 +125,11 @@ function CharityExpandedCard({
         <ActionLink href={charity.links.website} label="Website" />
         <ActionLink href={charity.links.volunteer} label="Volunteer" />
         <ActionLink href={charity.links.form990} label="Form 990" />
+        <MapLinkOptions
+          googleHref={mapLinks?.google}
+          appleHref={mapLinks?.apple}
+          anchorClassName="border-b border-[var(--color-border)] pb-0.5 transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
+        />
       </div>
 
       <div className="space-y-2">

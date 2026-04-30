@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { formatDate, formatLocation } from "@/lib/format";
+import { buildMapLinks } from "@/lib/mapLinks";
+import { MapLinkOptions } from "@/components/MapLinkOptions";
 import type { CharityOrganization } from "@/types/charity";
 
 interface CharityCardProps {
@@ -26,6 +28,8 @@ function ExternalLink({ href, label }: { href?: string; label: string }) {
 }
 
 export function CharityCard({ charity, categoryName }: CharityCardProps) {
+  const mapLinks = buildMapLinks(charity.contact, charity.name);
+
   return (
     <article className="dark-panel flex h-full flex-col gap-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -77,6 +81,11 @@ export function CharityCard({ charity, categoryName }: CharityCardProps) {
         <ExternalLink href={charity.links.donationFaq} label="Donation FAQ" />
         <ExternalLink href={charity.links.website} label="Website" />
         <ExternalLink href={charity.links.volunteer} label="Volunteer" />
+        <MapLinkOptions
+          googleHref={mapLinks?.google}
+          appleHref={mapLinks?.apple}
+          anchorClassName="border-b border-[var(--color-border)] pb-0.5 transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
+        />
       </div>
 
       <div className="mt-auto border-t border-[var(--color-border-soft)] pt-4 text-xs text-[var(--color-text-faint)]">
