@@ -603,200 +603,14 @@ export function ResourceFinder({
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="dark-panel space-y-4 p-5">
-          <form className="space-y-4" onSubmit={applySearch}>
-            <div className="grid gap-3 sm:grid-cols-[1fr_170px]">
-              <label className="text-xs text-[var(--color-text-muted)]">
-                <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
-                <input
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  placeholder="Enter city, state, or ZIP"
-                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-                />
-              </label>
-
-              <label className="text-xs text-[var(--color-text-muted)]">
-                <span className="mb-2 block uppercase tracking-wide">Radius</span>
-                <select
-                  value={radiusMiles}
-                  onChange={(event) => setRadiusMiles(Number(event.target.value))}
-                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                >
-                  {radiusOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option} miles
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-              <label className="text-xs text-[var(--color-text-muted)]">
-                <span className="mb-2 block uppercase tracking-wide">Keyword (optional)</span>
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="food bank, legal aid, youth programs"
-                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-                />
-              </label>
-
-              <button
-                type="submit"
-                className="h-11 border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
-              >
-                Find Resources
-              </button>
-            </div>
-
-            {searchError ? (
-              <p className="text-xs text-[var(--color-rose)]">{searchError}</p>
-            ) : null}
-
-            <details className="border border-[var(--color-border)] p-3">
-              <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
-                More filters
-              </summary>
-
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
-                  <select
-                    value={subcategory}
-                    onChange={(event) => setSubcategory(event.target.value)}
-                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                  >
-                    <option value="">All subcategories</option>
-                    {subcategories.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
-                  <select
-                    value={wayToHelp}
-                    onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
-                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                  >
-                    <option value="">All ways</option>
-                    {waysToHelp.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Service scope</span>
-                  <select
-                    value={serviceScale}
-                    onChange={(event) =>
-                      setServiceScale(event.target.value as ServiceScale | "")
-                    }
-                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                  >
-                    <option value="">All scopes</option>
-                    <option value="Local">Local</option>
-                    <option value="National">National</option>
-                    <option value="International">International</option>
-                  </select>
-                </label>
-
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Population served</span>
-                  <select
-                    value={populationServed}
-                    onChange={(event) => setPopulationServed(event.target.value)}
-                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                  >
-                    <option value="">All populations</option>
-                    {populations.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-                  <input
-                    type="checkbox"
-                    checked={verifiedOnly}
-                    onChange={(event) => setVerifiedOnly(event.target.checked)}
-                    className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/75%)]"
-                  />
-                  Verified/listed only
-                </label>
-              </div>
-            </details>
-          </form>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border-soft)] pt-3">
-            <p className="text-xs text-[var(--color-text-faint)]">
-              {hasSearched ? `${filtered.length} results` : "Search to see results"}
-            </p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
-            >
-              Reset
-            </button>
-          </div>
-
-          {showOpenPageLink ? (
-            <div>
-              <Link
-                href="/resource-finder"
-                className="text-xs tracking-wide text-[var(--color-text-muted)] uppercase underline underline-offset-4 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
-              >
-                Open full resource finder page
-              </Link>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="dark-panel space-y-3 p-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">Map results</h3>
-            <p className="text-xs text-[var(--color-text-faint)]">
-              {!hasSearched
-                ? "Enter a location and select Find Resources"
-                : locationCenter
-                  ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
-                  : "Location not recognized"}
-            </p>
-          </div>
-
+      <div className="dark-panel overflow-hidden p-0">
+        <div className="relative h-[34rem] sm:h-[40rem] lg:h-[44rem]">
           {mapsApiKey ? (
-            <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)]">
+            <div className="absolute inset-0 bg-[var(--color-surface-2)]">
               <div ref={mapContainerRef} className="h-full w-full" />
-              {!hasSearched ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  Enter a city, state, or ZIP and press Find Resources.
-                </div>
-              ) : null}
-              {hasSearched && !locationCenter ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  No location match found. Try a nearby city, state, or ZIP.
-                </div>
-              ) : null}
-              {mapError ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  {mapError}
-                </div>
-              ) : null}
             </div>
           ) : (
-            <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[linear-gradient(180deg,#171125_0%,#100c19_100%)]">
+            <div className="absolute inset-0 overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(180deg,#171125_0%,#100c19_100%)]">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_28%,rgba(140,107,196,0.2)_0%,rgba(140,107,196,0)_58%)]" />
               <div className="absolute left-1/2 top-1/2 h-[86%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
               <div className="absolute left-1/2 top-1/2 h-[56%] w-[56%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
@@ -812,23 +626,211 @@ export function ResourceFinder({
                     />
                   ))
                 : null}
-
-              {!hasSearched ? (
-                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  Enter a city, state, or ZIP and press Find Resources.
-                </div>
-              ) : null}
-              {hasSearched && !locationCenter ? (
-                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  No location match found yet. Try a nearby city, state, or ZIP.
-                </div>
-              ) : null}
-
-              <div className="absolute bottom-2 right-2 rounded border border-[var(--color-border)] bg-[rgb(13_10_18/85%)] px-2 py-1 text-[10px] text-[var(--color-text-faint)]">
-                Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for live Google map pins
-              </div>
             </div>
           )}
+
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
+
+          <form
+            className="absolute inset-0 z-20 flex flex-col justify-between"
+            onSubmit={applySearch}
+          >
+            <div className="border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5">
+              <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
+                  <input
+                    value={location}
+                    onChange={(event) => setLocation(event.target.value)}
+                    placeholder="Enter city, state, or ZIP"
+                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                  />
+                </label>
+
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Radius</span>
+                  <select
+                    value={radiusMiles}
+                    onChange={(event) => setRadiusMiles(Number(event.target.value))}
+                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                  >
+                    {radiusOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option} miles
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Keyword</span>
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="food bank, legal aid, youth programs"
+                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="h-11 self-end border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
+                >
+                  Find Resources
+                </button>
+              </div>
+
+              {searchError ? (
+                <p className="mt-2 text-xs text-[var(--color-rose)]">{searchError}</p>
+              ) : null}
+
+              <p className="mt-3 text-xs text-[var(--color-text-faint)]">
+                {!hasSearched
+                  ? "Enter a location and run a search to activate map pins and nearby results."
+                  : locationCenter
+                    ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
+                    : "Location not recognized. Try a nearby city, state, or ZIP."}
+              </p>
+            </div>
+
+            <div className="space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
+              <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
+                <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
+                  More filters
+                </summary>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
+                    <select
+                      value={subcategory}
+                      onChange={(event) => setSubcategory(event.target.value)}
+                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                    >
+                      <option value="">All subcategories</option>
+                      {subcategories.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
+                    <select
+                      value={wayToHelp}
+                      onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
+                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                    >
+                      <option value="">All ways</option>
+                      {waysToHelp.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Service scope</span>
+                    <select
+                      value={serviceScale}
+                      onChange={(event) =>
+                        setServiceScale(event.target.value as ServiceScale | "")
+                      }
+                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                    >
+                      <option value="">All scopes</option>
+                      <option value="Local">Local</option>
+                      <option value="National">National</option>
+                      <option value="International">International</option>
+                    </select>
+                  </label>
+
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Population served</span>
+                    <select
+                      value={populationServed}
+                      onChange={(event) => setPopulationServed(event.target.value)}
+                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                    >
+                      <option value="">All populations</option>
+                      {populations.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                    <input
+                      type="checkbox"
+                      checked={verifiedOnly}
+                      onChange={(event) => setVerifiedOnly(event.target.checked)}
+                      className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)]"
+                    />
+                    Verified/listed only
+                  </label>
+                </div>
+              </details>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs text-[var(--color-text-faint)]">
+                  {hasSearched ? `${filtered.length} results` : "Search to see results"}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  {showOpenPageLink ? (
+                    <Link
+                      href="/resource-finder"
+                      className="text-xs tracking-wide text-[var(--color-text-muted)] uppercase underline underline-offset-4 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
+                    >
+                      Open full resource finder page
+                    </Link>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          {!hasSearched ? (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                Enter a city, state, or ZIP and press Find Resources.
+              </p>
+            </div>
+          ) : null}
+
+          {hasSearched && !locationCenter ? (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                No location match found. Try a nearby city, state, or ZIP.
+              </p>
+            </div>
+          ) : null}
+
+          {mapsApiKey && mapError ? (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+              <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                {mapError}
+              </p>
+            </div>
+          ) : null}
+
+          {!mapsApiKey ? (
+            <div className="absolute bottom-3 right-3 z-20 rounded border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-2 py-1 text-[10px] text-[var(--color-text-faint)]">
+              Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for live Google map pins
+            </div>
+          ) : null}
         </div>
       </div>
 
