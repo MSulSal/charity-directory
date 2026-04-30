@@ -202,42 +202,31 @@ export function CategoryDropdownExplorer({
               </summary>
 
               <div className="space-y-3 border-t border-[var(--color-border-soft)] px-5 py-4">
-                {category.subcategories.map((subcategory) => {
-                  const subcategoryCharities = categoryCharities.filter((charity) =>
-                    charity.subcategories.includes(subcategory),
-                  );
+                {categoryCharities.length === 0 ? (
+                  <p className="text-sm text-[var(--color-text-faint)]">
+                    No charities are mapped to this category yet.
+                  </p>
+                ) : (
+                  categoryCharities
+                    .slice()
+                    .sort((left, right) => left.name.localeCompare(right.name))
+                    .map((charity) => (
+                      <details key={charity.id} className="dark-panel-soft" open={false}>
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-[var(--color-text-strong)]">
+                          <span>{charity.name}</span>
+                          <span className="text-xs text-[var(--color-text-faint)]">
+                            {[charity.contact.city, charity.contact.state]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </span>
+                        </summary>
 
-                  return (
-                    <details
-                      key={`${category.slug}-${subcategory}`}
-                      className="dark-panel-soft"
-                      open={false}
-                    >
-                      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-[var(--color-text-strong)]">
-                        <span>{subcategory}</span>
-                        <span className="text-xs text-[var(--color-text-faint)]">
-                          {subcategoryCharities.length} listings
-                        </span>
-                      </summary>
-
-                      <div className="space-y-3 border-t border-[var(--color-border-soft)] p-4">
-                        {subcategoryCharities.length === 0 ? (
-                          <p className="text-sm text-[var(--color-text-faint)]">
-                            No charities are mapped to this subcategory yet.
-                          </p>
-                        ) : (
-                          subcategoryCharities.map((charity) => (
-                            <CharityExpandedCard
-                              key={charity.id}
-                              charity={charity}
-                              categoryName={category.name}
-                            />
-                          ))
-                        )}
-                      </div>
-                    </details>
-                  );
-                })}
+                        <div className="border-t border-[var(--color-border-soft)] p-4">
+                          <CharityExpandedCard charity={charity} categoryName={category.name} />
+                        </div>
+                      </details>
+                    ))
+                )}
 
                 <div className="pt-1">
                   <Link

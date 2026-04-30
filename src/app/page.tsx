@@ -29,8 +29,8 @@ export default function HomePage() {
       <CategoryDropdownExplorer
         categories={categories}
         charities={charities}
-        title="Browse by Major Charity Category"
-        description="Explore the category dropdowns when you want to browse by cause first, then open subcategories to inspect detailed charity cards."
+        title="Charities"
+        description="Browse charities by major cause area, then open each charity name to view full details."
       />
     </>
   );
