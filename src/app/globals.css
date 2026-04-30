@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --color-obsidian: #0d0a12;
+  --color-midnight: #1a1323;
+  --color-royal-aubergine: #5b2e91;
+  --color-soft-amethyst: #8c6bc4;
+  --color-ivory: #f5f1eb;
+  --color-bone: #e7e0d8;
+  --color-stone: #b8aea1;
+  --color-saffron: #e8be4b;
+  --color-rose: #e56aa6;
+  --color-surface-1: #16111f;
+  --color-surface-2: #1d1729;
+  --color-surface-3: #251d34;
+  --color-border: #3b2f54;
+  --color-border-soft: #2c2240;
+  --color-text-strong: #f5f1eb;
+  --color-text-muted: #c8bdd6;
+  --color-text-faint: #9a8fb0;
+  --font-manrope: "Avenir Next", "Segoe UI", "Helvetica Neue", "Noto Sans",
+    sans-serif;
+}
+
+@theme inline {
+  --font-sans: var(--font-manrope);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(760px 380px at 80% -10%, rgb(140 107 196 / 22%), transparent 62%),
+    radial-gradient(680px 340px at 15% -5%, rgb(229 106 166 / 13%), transparent 66%),
+    linear-gradient(180deg, #0d0a12 0%, #120d1a 45%, #0d0a12 100%);
+  color: var(--color-text-strong);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+.dark-panel {
+  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    180deg,
+    rgb(37 29 52 / 70%) 0%,
+    rgb(29 23 41 / 94%) 100%
+  );
+  box-shadow:
+    0 24px 45px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.dark-panel-soft {
+  border: 1px solid var(--color-border-soft);
+  background: rgb(22 17 31 / 84%);
+}
