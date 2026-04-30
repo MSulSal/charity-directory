@@ -731,13 +731,7 @@ export function ResourceFinder({
           </div>
         ) : null}
 
-        <div
-          className={
-            showResultsPanel
-              ? "lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
-              : ""
-          }
-        >
+        <div className="relative">
           <div
             className={`relative h-[34rem] sm:h-[40rem] lg:h-[44rem] ${
               showResultsPanel && mobileResultsView === "list" ? "hidden lg:block" : "block"
@@ -989,9 +983,9 @@ export function ResourceFinder({
 
           {showResultsPanel ? (
             <aside
-              className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/88%)] ${
-                mobileResultsView === "map" ? "hidden lg:flex" : "flex"
-              } flex-col lg:h-[44rem] lg:border-t-0 lg:border-l lg:border-l-[var(--color-border-soft)]`}
+              className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/92%)] ${
+                mobileResultsView === "map" ? "hidden" : "flex"
+              } flex-col lg:absolute lg:inset-y-0 lg:right-0 lg:z-[1300] lg:flex lg:w-[24rem] lg:border-t-0 lg:border-l lg:border-l-[var(--color-border-soft)]`}
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-border-soft)] px-4 py-3">
                 <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
