@@ -235,6 +235,7 @@ export function ResourceFinder({
   showOpenPageLink = false,
 }: ResourceFinderProps) {
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const hasInitialSearch = initialLocation.trim().length > 0;
 
   const [query, setQuery] = useState(initialQuery);
   const [location, setLocation] = useState(initialLocation);
@@ -246,6 +247,20 @@ export function ResourceFinder({
     initialServiceScale,
   );
   const [populationServed, setPopulationServed] = useState(initialPopulationServed);
+  const [activeQuery, setActiveQuery] = useState(initialQuery);
+  const [activeLocation, setActiveLocation] = useState(initialLocation);
+  const [activeRadiusMiles, setActiveRadiusMiles] = useState(initialRadiusMiles);
+  const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
+  const [activeWayToHelp, setActiveWayToHelp] = useState<WayToHelp | "">(initialWayToHelp);
+  const [activeVerifiedOnly, setActiveVerifiedOnly] = useState(initialVerifiedOnly);
+  const [activeServiceScale, setActiveServiceScale] = useState<ServiceScale | "">(
+    initialServiceScale,
+  );
+  const [activePopulationServed, setActivePopulationServed] = useState(
+    initialPopulationServed,
+  );
+  const [hasSearched, setHasSearched] = useState(hasInitialSearch);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -277,8 +292,8 @@ export function ResourceFinder({
   );
 
   const locationCenter = useMemo(
-    () => resolveLocationQuery(location, charities),
-    [location, charities],
+    () => (hasSearched ? resolveLocationQuery(activeLocation, charities) : null),
+    [activeLocation, charities, hasSearched],
   );
 
   const withDistance = useMemo(
@@ -287,8 +302,16 @@ export function ResourceFinder({
   );
 
   const filtered = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const hasLocationText = location.trim().length > 0;
+    if (!hasSearched) {
+      return [];
+    }
+
+    const normalizedQuery = activeQuery.trim().toLowerCase();
+    const hasLocationText = activeLocation.trim().length > 0;
+
+    if (!hasLocationText) {
+      return [];
+    }
 
     const results = withDistance.filter(({ charity, distanceMiles }) => {
       if (normalizedQuery) {
@@ -308,28 +331,35 @@ export function ResourceFinder({
       }
 
       if (hasLocationText) {
-        if (!locationCenter || distanceMiles === null || distanceMiles > radiusMiles) {
+        if (
+          !locationCenter ||
+          distanceMiles === null ||
+          distanceMiles > activeRadiusMiles
+        ) {
           return false;
         }
       }
 
-      if (subcategory && !charity.subcategories.includes(subcategory)) {
+      if (activeSubcategory && !charity.subcategories.includes(activeSubcategory)) {
         return false;
       }
 
-      if (wayToHelp && !charity.waysToHelp.includes(wayToHelp)) {
+      if (activeWayToHelp && !charity.waysToHelp.includes(activeWayToHelp)) {
         return false;
       }
 
-      if (serviceScale && charity.serviceScale !== serviceScale) {
+      if (activeServiceScale && charity.serviceScale !== activeServiceScale) {
         return false;
       }
 
-      if (populationServed && !charity.populationServed.includes(populationServed)) {
+      if (
+        activePopulationServed &&
+        !charity.populationServed.includes(activePopulationServed)
+      ) {
         return false;
       }
 
-      if (verifiedOnly && !isVetted(charity)) {
+      if (activeVerifiedOnly && !isVetted(charity)) {
         return false;
       }
 
@@ -352,15 +382,16 @@ export function ResourceFinder({
       return left.charity.name.localeCompare(right.charity.name);
     });
   }, [
-    location,
+    activeLocation,
+    activePopulationServed,
+    activeQuery,
+    activeRadiusMiles,
+    activeServiceScale,
+    activeSubcategory,
+    activeVerifiedOnly,
+    activeWayToHelp,
+    hasSearched,
     locationCenter,
-    populationServed,
-    query,
-    radiusMiles,
-    serviceScale,
-    subcategory,
-    verifiedOnly,
-    wayToHelp,
     withDistance,
   ]);
 
@@ -389,7 +420,7 @@ export function ResourceFinder({
           longitude: charity.contact.longitude as number,
           label: charity.name,
         },
-        radiusMiles,
+        activeRadiusMiles,
       );
 
       return {
@@ -400,7 +431,7 @@ export function ResourceFinder({
         distance: distanceMiles as number,
       };
     });
-  }, [locationCenter, mappableResults, radiusMiles]);
+  }, [activeRadiusMiles, locationCenter, mappableResults]);
 
   useEffect(() => {
     if (!mapsApiKey || !mapContainerRef.current) {
@@ -417,14 +448,15 @@ export function ResourceFinder({
 
         setMapError(null);
 
-        const center = locationCenter
-          ? { lat: locationCenter.latitude, lng: locationCenter.longitude }
-          : { lat: 39.5, lng: -98.35 };
+        const center =
+          hasSearched && locationCenter
+            ? { lat: locationCenter.latitude, lng: locationCenter.longitude }
+            : { lat: 39.5, lng: -98.35 };
 
         if (!googleMapRef.current) {
           googleMapRef.current = new maps.Map(mapContainerRef.current, {
             center,
-            zoom: locationCenter ? zoomForRadius(radiusMiles) : 4,
+            zoom: hasSearched && locationCenter ? zoomForRadius(activeRadiusMiles) : 4,
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: true,
@@ -434,14 +466,14 @@ export function ResourceFinder({
 
         const map = googleMapRef.current;
         map.setCenter(center);
-        map.setZoom(locationCenter ? zoomForRadius(radiusMiles) : 4);
+        map.setZoom(hasSearched && locationCenter ? zoomForRadius(activeRadiusMiles) : 4);
 
         googleMarkersRef.current.forEach((marker) => marker.setMap(null));
         googleMarkersRef.current = [];
 
         const bounds = new maps.LatLngBounds();
 
-        if (locationCenter) {
+        if (hasSearched && locationCenter) {
           bounds.extend(center);
 
           const originMarker = new maps.Marker({
@@ -495,7 +527,7 @@ export function ResourceFinder({
           });
         });
 
-        if (locationCenter && mappableResults.length > 0) {
+        if (hasSearched && locationCenter && mappableResults.length > 0) {
           map.fitBounds(bounds);
         }
       })
@@ -511,11 +543,33 @@ export function ResourceFinder({
       cancelled = true;
     };
   }, [
+    activeRadiusMiles,
+    hasSearched,
     locationCenter,
     mappableResults,
     mapsApiKey,
-    radiusMiles,
   ]);
+
+  function applySearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!location.trim()) {
+      setHasSearched(false);
+      setSearchError("Enter a city, state, or ZIP to search nearby resources.");
+      return;
+    }
+
+    setSearchError(null);
+    setActiveQuery(query.trim());
+    setActiveLocation(location.trim());
+    setActiveRadiusMiles(radiusMiles);
+    setActiveSubcategory(subcategory);
+    setActiveWayToHelp(wayToHelp);
+    setActiveVerifiedOnly(verifiedOnly);
+    setActiveServiceScale(serviceScale);
+    setActivePopulationServed(populationServed);
+    setHasSearched(true);
+  }
 
   function resetFilters() {
     setQuery(initialQuery);
@@ -526,6 +580,16 @@ export function ResourceFinder({
     setVerifiedOnly(initialVerifiedOnly);
     setServiceScale(initialServiceScale);
     setPopulationServed(initialPopulationServed);
+    setActiveQuery(initialQuery);
+    setActiveLocation(initialLocation);
+    setActiveRadiusMiles(initialRadiusMiles);
+    setActiveSubcategory(initialSubcategory);
+    setActiveWayToHelp(initialWayToHelp);
+    setActiveVerifiedOnly(initialVerifiedOnly);
+    setActiveServiceScale(initialServiceScale);
+    setActivePopulationServed(initialPopulationServed);
+    setHasSearched(hasInitialSearch);
+    setSearchError(null);
   }
 
   return (
@@ -541,130 +605,151 @@ export function ResourceFinder({
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="dark-panel space-y-4 p-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Location</span>
-              <input
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                placeholder="City, state, or ZIP"
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-              />
-            </label>
+          <form className="space-y-4" onSubmit={applySearch}>
+            <div className="grid gap-3 sm:grid-cols-[1fr_170px]">
+              <label className="text-xs text-[var(--color-text-muted)]">
+                <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
+                <input
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
+                  placeholder="Enter city, state, or ZIP"
+                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                />
+              </label>
 
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Radius</span>
-              <select
-                value={radiusMiles}
-                onChange={(event) => setRadiusMiles(Number(event.target.value))}
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-              >
-                {radiusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option} miles
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label className="text-xs text-[var(--color-text-muted)]">
+                <span className="mb-2 block uppercase tracking-wide">Radius</span>
+                <select
+                  value={radiusMiles}
+                  onChange={(event) => setRadiusMiles(Number(event.target.value))}
+                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                >
+                  {radiusOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option} miles
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
 
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Keyword</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="food bank, legal aid, youth"
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-              />
-            </label>
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <label className="text-xs text-[var(--color-text-muted)]">
+                <span className="mb-2 block uppercase tracking-wide">Keyword (optional)</span>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="food bank, legal aid, youth programs"
+                  className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                />
+              </label>
 
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
-              <select
-                value={subcategory}
-                onChange={(event) => setSubcategory(event.target.value)}
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-              >
-                <option value="">All subcategories</option>
-                {subcategories.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
-              <select
-                value={wayToHelp}
-                onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-              >
-                <option value="">All ways</option>
-                {waysToHelp.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="text-xs text-[var(--color-text-muted)]">
-              <span className="mb-2 block uppercase tracking-wide">Service scope</span>
-              <select
-                value={serviceScale}
-                onChange={(event) =>
-                  setServiceScale(event.target.value as ServiceScale | "")
-                }
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-              >
-                <option value="">All scopes</option>
-                <option value="Local">Local</option>
-                <option value="National">National</option>
-                <option value="International">International</option>
-              </select>
-            </label>
-
-            <label className="text-xs text-[var(--color-text-muted)] sm:col-span-2 lg:col-span-1">
-              <span className="mb-2 block uppercase tracking-wide">Population served</span>
-              <select
-                value={populationServed}
-                onChange={(event) => setPopulationServed(event.target.value)}
-                className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-              >
-                <option value="">All populations</option>
-                {populations.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border-soft)] pt-3">
-            <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-              <input
-                type="checkbox"
-                checked={verifiedOnly}
-                onChange={(event) => setVerifiedOnly(event.target.checked)}
-                className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/75%)]"
-              />
-              Verified/listed only
-            </label>
-
-            <div className="flex items-center gap-3">
-              <p className="text-xs text-[var(--color-text-faint)]">
-                {filtered.length} results
-              </p>
               <button
-                type="button"
-                onClick={resetFilters}
-                className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+                type="submit"
+                className="h-11 border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
               >
-                Reset
+                Find Resources
               </button>
             </div>
+
+            {searchError ? (
+              <p className="text-xs text-[var(--color-rose)]">{searchError}</p>
+            ) : null}
+
+            <details className="border border-[var(--color-border)] p-3">
+              <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
+                More filters
+              </summary>
+
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
+                  <select
+                    value={subcategory}
+                    onChange={(event) => setSubcategory(event.target.value)}
+                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                  >
+                    <option value="">All subcategories</option>
+                    {subcategories.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
+                  <select
+                    value={wayToHelp}
+                    onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
+                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                  >
+                    <option value="">All ways</option>
+                    {waysToHelp.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Service scope</span>
+                  <select
+                    value={serviceScale}
+                    onChange={(event) =>
+                      setServiceScale(event.target.value as ServiceScale | "")
+                    }
+                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                  >
+                    <option value="">All scopes</option>
+                    <option value="Local">Local</option>
+                    <option value="National">National</option>
+                    <option value="International">International</option>
+                  </select>
+                </label>
+
+                <label className="text-xs text-[var(--color-text-muted)]">
+                  <span className="mb-2 block uppercase tracking-wide">Population served</span>
+                  <select
+                    value={populationServed}
+                    onChange={(event) => setPopulationServed(event.target.value)}
+                    className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                  >
+                    <option value="">All populations</option>
+                    {populations.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(event) => setVerifiedOnly(event.target.checked)}
+                    className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/75%)]"
+                  />
+                  Verified/listed only
+                </label>
+              </div>
+            </details>
+          </form>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border-soft)] pt-3">
+            <p className="text-xs text-[var(--color-text-faint)]">
+              {hasSearched ? `${filtered.length} results` : "Search to see results"}
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+            >
+              Reset
+            </button>
           </div>
 
           {showOpenPageLink ? (
@@ -683,17 +768,27 @@ export function ResourceFinder({
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">Map results</h3>
             <p className="text-xs text-[var(--color-text-faint)]">
-              {locationCenter
-                ? `${locationCenter.label} • ${radiusMiles} mi radius`
-                : location.trim()
-                  ? "Location not recognized"
-                  : "Enter a location (city/state or ZIP) to activate radius search"}
+              {!hasSearched
+                ? "Enter a location and select Find Resources"
+                : locationCenter
+                  ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
+                  : "Location not recognized"}
             </p>
           </div>
 
           {mapsApiKey ? (
             <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)]">
               <div ref={mapContainerRef} className="h-full w-full" />
+              {!hasSearched ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
+                  Enter a city, state, or ZIP and press Find Resources.
+                </div>
+              ) : null}
+              {hasSearched && !locationCenter ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
+                  No location match found. Try a nearby city, state, or ZIP.
+                </div>
+              ) : null}
               {mapError ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
                   {mapError}
@@ -707,7 +802,7 @@ export function ResourceFinder({
               <div className="absolute left-1/2 top-1/2 h-[56%] w-[56%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
               <div className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-saffron)]" />
 
-              {locationCenter
+              {hasSearched && locationCenter
                 ? fallbackMarkers.map((marker) => (
                     <div
                       key={marker.id}
@@ -718,11 +813,14 @@ export function ResourceFinder({
                   ))
                 : null}
 
-              {!locationCenter ? (
+              {!hasSearched ? (
                 <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
-                  {location.trim()
-                    ? "No location match found yet. Try city/state or ZIP."
-                    : "Set a location to see nearby charities plotted on the map."}
+                  Enter a city, state, or ZIP and press Find Resources.
+                </div>
+              ) : null}
+              {hasSearched && !locationCenter ? (
+                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
+                  No location match found yet. Try a nearby city, state, or ZIP.
                 </div>
               ) : null}
 
@@ -740,18 +838,24 @@ export function ResourceFinder({
             Matching organizations
           </h3>
           <p className="text-xs text-[var(--color-text-faint)]">
-            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+            {hasSearched
+              ? `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`
+              : "No search yet"}
           </p>
         </div>
 
-        {filtered.length === 0 ? (
+        {!hasSearched ? (
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Enter a location and press Find Resources to load matching organizations.
+          </p>
+        ) : filtered.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">
             No resources found with the current location, radius, and filter settings.
           </p>
         ) : (
           <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
             {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
-              const directionsUrl = buildDirectionsUrl(charity, location);
+              const directionsUrl = buildDirectionsUrl(charity, activeLocation);
 
               return (
                 <li key={charity.id} className="space-y-2 p-3">
