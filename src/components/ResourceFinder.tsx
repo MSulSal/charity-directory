@@ -4,9 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import {
+  geocodeLocationQuery,
   resolveLocationQuery,
   withDistanceFrom,
 } from "@/lib/geo";
+import type { GeoPoint } from "@/lib/geo";
 import type {
   Category,
   CharityOrganization,
@@ -95,6 +97,9 @@ export function ResourceFinder({
   showOpenPageLink = false,
 }: ResourceFinderProps) {
   const hasInitialSearch = initialLocation.trim().length > 0;
+  const initialResolvedCenter = hasInitialSearch
+    ? resolveLocationQuery(initialLocation, charities)
+    : null;
 
   const [query, setQuery] = useState(initialQuery);
   const [location, setLocation] = useState(initialLocation);
@@ -118,6 +123,10 @@ export function ResourceFinder({
   const [activePopulationServed, setActivePopulationServed] = useState(
     initialPopulationServed,
   );
+  const [geocodedCenter, setGeocodedCenter] = useState<GeoPoint | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(
+    hasInitialSearch && !initialResolvedCenter,
+  );
   const [hasSearched, setHasSearched] = useState(hasInitialSearch);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -126,6 +135,7 @@ export function ResourceFinder({
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
+  const geocodeCacheRef = useRef<Map<string, GeoPoint | null>>(new Map());
 
   const categoryMap = useMemo(
     () =>
@@ -150,9 +160,14 @@ export function ResourceFinder({
     [charities],
   );
 
-  const locationCenter = useMemo(
+  const datasetLocationCenter = useMemo(
     () => (hasSearched ? resolveLocationQuery(activeLocation, charities) : null),
     [activeLocation, charities, hasSearched],
+  );
+
+  const locationCenter = useMemo(
+    () => datasetLocationCenter ?? geocodedCenter,
+    [datasetLocationCenter, geocodedCenter],
   );
 
   const withDistance = useMemo(
@@ -265,6 +280,58 @@ export function ResourceFinder({
       }),
     [filtered],
   );
+
+  useEffect(() => {
+    if (!hasSearched) {
+      return;
+    }
+
+    const trimmedLocation = activeLocation.trim();
+
+    if (!trimmedLocation) {
+      return;
+    }
+
+    if (datasetLocationCenter) {
+      return;
+    }
+
+    const cacheKey = trimmedLocation.toLowerCase();
+    if (geocodeCacheRef.current.has(cacheKey)) {
+      const cachedCenter = geocodeCacheRef.current.get(cacheKey) ?? null;
+      Promise.resolve().then(() => {
+        setGeocodedCenter(cachedCenter);
+        setIsGeocoding(false);
+      });
+      return;
+    }
+
+    const controller = new AbortController();
+
+    geocodeLocationQuery(trimmedLocation, controller.signal)
+      .then((point) => {
+        geocodeCacheRef.current.set(cacheKey, point);
+        setGeocodedCenter(point);
+        setIsGeocoding(false);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        geocodeCacheRef.current.set(cacheKey, null);
+        setGeocodedCenter(null);
+        setIsGeocoding(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [
+    activeLocation,
+    datasetLocationCenter,
+    hasSearched,
+  ]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
@@ -387,11 +454,17 @@ export function ResourceFinder({
 
     if (!location.trim()) {
       setHasSearched(false);
+      setGeocodedCenter(null);
+      setIsGeocoding(false);
       setSearchError("Enter a city, state, or ZIP to search nearby resources.");
       return;
     }
 
+    const localDatasetCenter = resolveLocationQuery(location.trim(), charities);
+
     setSearchError(null);
+    setGeocodedCenter(null);
+    setIsGeocoding(!localDatasetCenter);
     setActiveQuery(query.trim());
     setActiveLocation(location.trim());
     setActiveRadiusMiles(radiusMiles);
@@ -420,6 +493,8 @@ export function ResourceFinder({
     setActiveVerifiedOnly(initialVerifiedOnly);
     setActiveServiceScale(initialServiceScale);
     setActivePopulationServed(initialPopulationServed);
+    setGeocodedCenter(null);
+    setIsGeocoding(false);
     setHasSearched(hasInitialSearch);
     setSearchError(null);
   }
@@ -501,7 +576,9 @@ export function ResourceFinder({
                   ? "Enter a location and run a search to activate map pins and nearby results."
                   : locationCenter
                     ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
-                    : "Location not recognized. Try a nearby city, state, or ZIP."}
+                    : isGeocoding
+                      ? "Looking up location..."
+                      : "Location not recognized. Try a nearby city, state, or ZIP."}
               </p>
             </form>
 
@@ -622,10 +699,18 @@ export function ResourceFinder({
             </div>
           ) : null}
 
-          {hasSearched && !locationCenter ? (
+          {hasSearched && !locationCenter && !isGeocoding ? (
             <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
               <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                 No location match found. Try a nearby city, state, or ZIP.
+              </p>
+            </div>
+          ) : null}
+
+          {hasSearched && !locationCenter && isGeocoding ? (
+            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
+              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                Looking up location...
               </p>
             </div>
           ) : null}
@@ -655,6 +740,10 @@ export function ResourceFinder({
         {!hasSearched ? (
           <p className="text-sm text-[var(--color-text-muted)]">
             Enter a location and press Find Resources to load matching organizations.
+          </p>
+        ) : isGeocoding ? (
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Looking up location...
           </p>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">

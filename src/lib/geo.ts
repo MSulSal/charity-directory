@@ -11,6 +11,12 @@ export interface CharityWithDistance {
   distanceMiles: number | null;
 }
 
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
 const knownCities: Array<{ key: string; latitude: number; longitude: number; label: string }> = [
   { key: "memphis, tn", latitude: 35.1495, longitude: -90.049, label: "Memphis, TN" },
   { key: "st. louis, mo", latitude: 38.627, longitude: -90.1994, label: "St. Louis, MO" },
@@ -115,6 +121,64 @@ export function resolveLocationQuery(
   }
 
   return null;
+}
+
+export async function geocodeLocationQuery(
+  query: string,
+  signal?: AbortSignal,
+): Promise<GeoPoint | null> {
+  const normalized = normalize(query);
+  if (!normalized) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    q: query.trim(),
+    format: "jsonv2",
+    limit: "1",
+  });
+
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+    {
+      method: "GET",
+      signal,
+      headers: {
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as NominatimResult[];
+  const first = payload[0];
+
+  if (!first) {
+    return null;
+  }
+
+  const latitude = Number(first.lat);
+  const longitude = Number(first.lon);
+
+  if (
+    Number.isNaN(latitude) ||
+    Number.isNaN(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  return {
+    latitude,
+    longitude,
+    label: first.display_name || query.trim(),
+  };
 }
 
 export function haversineMiles(start: GeoPoint, end: GeoPoint) {
