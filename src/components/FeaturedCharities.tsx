@@ -21,7 +21,7 @@ export function FeaturedCharities({
           Featured Charity Profiles
         </h2>
         <p className="text-sm leading-7 text-[var(--color-text-muted)]">
-          This section mixes prototype sample records with pilot real-data records so we can tune card detail density, trust fields, and action links.
+          This section mixes sample records with live-source records so we can continue improving card detail density, trust fields, and action links.
         </p>
       </div>
 

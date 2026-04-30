@@ -1,7 +1,7 @@
 import type { CharityOrganization } from "@/types/charity";
 
 const verificationFieldNotice =
-  "Sample verification field only. No live watchdog rating is asserted in this prototype.";
+  "Sample verification field only. No live watchdog rating is asserted.";
 
 export const charities: CharityOrganization[] = [
   {
@@ -145,10 +145,10 @@ export const charities: CharityOrganization[] = [
       },
     ],
     ein: "00-0000001",
-    status501c3: "Sample data: Marked as 501(c)(3) for layout demonstration.",
+    status501c3: "Sample data: Marked as 501(c)(3) for initial directory records.",
     lastVerified: "2026-04-20",
     notes:
-      "Sample dataset entry for prototyping. Contact details and links are placeholders.",
+      "Sample dataset entry. Contact details and links are placeholders.",
   },
   {
     id: "charity-002",

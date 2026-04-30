@@ -27,7 +27,7 @@ export function Footer() {
         </div>
 
         <p className="max-w-3xl text-xs leading-6 text-[var(--color-text-faint)]">
-          Sample prototype for Charity Directory. Organization details, trust badges, and links currently use mock data fields for product design and testing.
+          Charity Directory includes a mix of sample and live-source records while we expand coverage. Always review each organization profile, contact details, and verification fields before taking action.
         </p>
       </div>
     </footer>
