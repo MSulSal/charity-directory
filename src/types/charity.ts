@@ -38,6 +38,8 @@ export interface ContactInfo {
   addressLine1?: string;
   city: string;
   state: string;
+  latitude?: number;
+  longitude?: number;
   postalCode?: string;
   country?: string;
 }

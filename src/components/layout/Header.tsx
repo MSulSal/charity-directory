@@ -5,9 +5,9 @@ import Link from "next/link";
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/resource-finder", label: "Resource Finder" },
   { href: "/categories", label: "Categories" },
-  { href: "/charities", label: "Charities" },
-  { href: "/charities?verified=1", label: "Trust & Verification" },
+  { href: "/resource-finder?verified=1", label: "Trust & Verification" },
 ];
 
 export function Header() {

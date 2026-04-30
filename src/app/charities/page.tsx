@@ -1,30 +1,64 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { CharityCatalog } from "@/components/CharityCatalog";
-import { categories, charities } from "@/data";
-import { filtersFromSearchParams } from "@/lib/filters";
-
-interface CharitiesPageProps {
+interface LegacyCharitiesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export const metadata: Metadata = {
-  title: "Charity Listings",
-  description:
-    "Find local nonprofits, donation opportunities, and volunteer options with filters for cause, location, and ways to help.",
-};
+function firstValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value[0] || "";
+  }
 
-export default async function CharitiesPage({ searchParams }: CharitiesPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const initialFilters = filtersFromSearchParams(resolvedSearchParams);
+  return value || "";
+}
 
-  return (
-    <CharityCatalog
-      charities={charities}
-      categories={categories}
-      initialFilters={initialFilters}
-      title="Browse Charity Listings"
-      description="Search and filter sample records by subcategory, location, ways to help, trust field status, service scale, and population served."
-    />
-  );
+export default async function LegacyCharitiesPage({
+  searchParams,
+}: LegacyCharitiesPageProps) {
+  const resolved = await searchParams;
+  const params = new URLSearchParams();
+
+  const query = firstValue(resolved.q);
+  const location = firstValue(resolved.location);
+  const way = firstValue(resolved.way) || firstValue(resolved.wayToHelp);
+  const verified = firstValue(resolved.verified);
+  const radius = firstValue(resolved.radius);
+  const subcategory = firstValue(resolved.subcategory);
+  const scale = firstValue(resolved.scale);
+  const population = firstValue(resolved.population);
+
+  if (query) {
+    params.set("q", query);
+  }
+
+  if (location) {
+    params.set("location", location);
+  }
+
+  if (way) {
+    params.set("way", way);
+  }
+
+  if (verified) {
+    params.set("verified", verified);
+  }
+
+  if (radius) {
+    params.set("radius", radius);
+  }
+
+  if (subcategory) {
+    params.set("subcategory", subcategory);
+  }
+
+  if (scale) {
+    params.set("scale", scale);
+  }
+
+  if (population) {
+    params.set("population", population);
+  }
+
+  const queryString = params.toString();
+  redirect(queryString ? `/resource-finder?${queryString}` : "/resource-finder");
 }

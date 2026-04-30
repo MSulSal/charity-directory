@@ -2,11 +2,11 @@ import Link from "next/link";
 
 const footerLinks = [
   { href: "/about", label: "About" },
+  { href: "/resource-finder", label: "Resource Finder" },
   { href: "/categories", label: "Categories" },
-  { href: "/charities", label: "Charities" },
   { href: "/for-nonprofits", label: "For Nonprofits" },
   { href: "/submit-a-charity", label: "Submit a Charity" },
-  { href: "/charities?verified=1", label: "Trust & Verification" },
+  { href: "/resource-finder?verified=1", label: "Trust & Verification" },
   { href: "/contact", label: "Contact" },
 ];
 

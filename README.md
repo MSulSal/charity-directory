@@ -58,20 +58,18 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
 
 - Premium homepage with:
   - Hero copy, trust messaging, and search fields for "Charity, cause, or need" + location
+  - Section flow: Hero -> Resource Finder -> Category Browser
   - Quick action chips: Donate, Volunteer, Get Help, Donate Goods, Find Local Charities
+- Resource Finder (map + radius search):
+  - `/resource-finder`
+  - Enter location and radius to find nearby charities
+  - Filter by subcategory, ways to help, verified/listed, service scope, and population served
+  - Visual map panel with plotted result markers (no API key required)
 - Category browsing:
   - `/categories`
   - `/categories/[slug]`
-  - Five major categories with full subcategory lists
-- Charity listing discovery:
-  - `/charities`
-  - Client-side filters for:
-    - Subcategory
-    - Location
-    - Ways to help
-    - Verified/vetted only
-    - Local/National/International
-    - Population served
+  - Five major categories with expandable subcategory dropdowns
+  - Subcategory expansion reveals detailed charity cards directly in the category explorer
 - Charity profiles:
   - `/charities/[slug]`
   - Mission, category, subcategories, populations served, service area
@@ -81,7 +79,8 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
   - Social links, map preview, and related charities
 - Reusable component architecture:
   - `Hero`, `SearchBar`, `AudienceActionChips`
-  - `CategoryGrid`, `CategoryCard`, `SubcategoryList`
+  - `ResourceFinder`
+  - `CategoryDropdownExplorer`, `CategoryCard`, `SubcategoryList`
   - `CharityCard`, `CharityProfile`
   - `VerificationBadges`, `MapPreview`
   - `FilterSidebar`
@@ -99,10 +98,14 @@ If the key is missing, charity profiles show a styled map placeholder plus a "Vi
 ## Routes
 
 - `/`
+- `/resource-finder`
 - `/categories`
 - `/categories/[slug]`
-- `/charities`
 - `/charities/[slug]`
+
+Legacy route:
+
+- `/charities` redirects to `/resource-finder`
 
 Also includes placeholder utility pages linked in the footer:
 
@@ -113,7 +116,7 @@ Also includes placeholder utility pages linked in the footer:
 
 ## Data Notes (Important)
 
-- The dataset in this repo is **sample/mock data** only.
+- The dataset is currently a mix of prototype sample records and pilot real-data records.
 - No live watchdog ratings are claimed.
 - Verification-related values are modeled as structured fields so real integrations can be added later (for example: Charity Navigator, Candid/GuideStar, IRS nonprofit status, BBB Wise Giving Alliance).
 

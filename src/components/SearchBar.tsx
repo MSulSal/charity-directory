@@ -11,7 +11,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-  actionPath = "/charities",
+  actionPath = "/resource-finder",
   defaultQuery = "",
   defaultLocation = "",
   className,
