@@ -41,7 +41,7 @@ export function CharityProfile({
     <article className="mx-auto w-full max-w-7xl space-y-10 px-6 py-12 sm:px-8 lg:px-10 lg:py-16">
       <header className="dark-panel space-y-5 p-7 sm:p-10">
         <p className="text-xs tracking-[0.16em] text-[var(--color-text-faint)] uppercase">
-          Sample charity profile / {category.name}
+          {charity.sampleData ? "Sample charity profile" : "Organization profile"} / {category.name}
         </p>
         <h1 className="font-semibold text-4xl leading-tight text-[var(--color-text-strong)] sm:text-5xl">
           {charity.name}

@@ -74,7 +74,7 @@ export function SearchBar({
 
       <button
         type="submit"
-        className="h-12 border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-6 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
+        className="h-12 w-full border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-6 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95 sm:w-auto"
       >
         Search Directory
       </button>

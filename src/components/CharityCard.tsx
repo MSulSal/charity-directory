@@ -30,7 +30,9 @@ export function CharityCard({ charity, categoryName }: CharityCardProps) {
     <article className="dark-panel flex h-full flex-col gap-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-2">
-          <p className="text-xs tracking-[0.15em] text-[var(--color-text-faint)] uppercase">Sample profile</p>
+          <p className="text-xs tracking-[0.15em] text-[var(--color-text-faint)] uppercase">
+            {charity.sampleData ? "Sample profile" : "Organization profile"}
+          </p>
           <h3 className="font-semibold text-2xl leading-tight text-[var(--color-text-strong)]">
             <Link
               href={`/charities/${charity.slug}`}

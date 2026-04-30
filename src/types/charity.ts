@@ -63,7 +63,7 @@ export interface CharityOrganization {
   slug: string;
   name: string;
   mission: string;
-  sampleData: true;
+  sampleData: boolean;
   categorySlug: string;
   subcategories: string[];
   populationServed: string[];

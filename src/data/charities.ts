@@ -5,6 +5,93 @@ const verificationFieldNotice =
 
 export const charities: CharityOrganization[] = [
   {
+    id: "charity-000",
+    slug: "st-jude-childrens-research-hospital",
+    name: "St. Jude Children's Research Hospital",
+    mission:
+      "Advance cures, and means of prevention, for pediatric catastrophic diseases through research and treatment, while ensuring no child is denied treatment based on race, religion, or a family's ability to pay.",
+    sampleData: false,
+    categorySlug: "health-wellbeing",
+    subcategories: [
+      "Hospitals & clinics",
+      "Medical research",
+      "Disease-specific charities",
+      "Patient support",
+    ],
+    populationServed: [
+      "Children with cancer",
+      "Children with catastrophic diseases",
+      "Families and caregivers",
+    ],
+    serviceScale: "International",
+    serviceArea: "Memphis-based care with U.S. and global research/partnership impact",
+    contact: {
+      phone: "+1 (800) 822-6344",
+      email: "donors@stjude.org",
+      addressLine1: "262 Danny Thomas Place",
+      city: "Memphis",
+      state: "TN",
+      postalCode: "38105",
+      country: "USA",
+    },
+    links: {
+      website: "https://www.stjude.org/",
+      donate: "https://www.stjude.org/donate/donate-to-st-jude.html",
+      donationFaq:
+        "https://www.stjude.org/about-st-jude/faq/how-can-i-donate-to-st-jude.html",
+      volunteer: "https://www.stjude.org/get-involved/volunteer-locally.html",
+      form990:
+        "https://www.stjude.org/content/dam/en_US/shared/www/about-st-jude/financial-information/st-jude-financials-990-irs-form-2024.pdf",
+    },
+    social: {
+      facebook: "https://www.facebook.com/stjude",
+      instagram: "https://www.instagram.com/stjude",
+      x: "https://twitter.com/StJude",
+      youtube: "https://www.youtube.com/user/MyStJude",
+    },
+    waysToHelp: ["Donate", "Volunteer", "Goods", "Events", "Remote"],
+    goodsDonationInfo:
+      "St. Jude publishes a 'Donate Toys to St. Jude Patients' option for needed items that support patient activities and playrooms.",
+    verificationBadges: [
+      {
+        source: "IRS / St. Jude Tax FAQ",
+        label: "501(c)(3) status and EIN listed on St. Jude FAQ",
+        status: "listed",
+        url: "https://www.stjude.org/about-st-jude/faq/is-my-donation-tax-deductible.html",
+        updatedAt: "2026-04-30",
+      },
+      {
+        source: "St. Jude Financials",
+        label: "Organization Form 990 published on financials page",
+        status: "listed",
+        url: "https://www.stjude.org/about-st-jude/financials.html",
+        updatedAt: "2026-04-30",
+      },
+      {
+        source: "Charity Navigator",
+        label: "Impact report link provided by St. Jude financials page",
+        status: "listed",
+        url: "https://www.charitynavigator.org/ein/351044585",
+        updatedAt: "2026-04-30",
+        note: "Charity Navigator link shown on St. Jude financials page.",
+      },
+      {
+        source: "BBB Wise Giving Alliance",
+        label: "Accreditation link provided by St. Jude financials page",
+        status: "listed",
+        url: "https://give.org/charity-reviews/health/alsac-st-jude-childrens-research-hospital-in-memphis-tn-9999-2903",
+        updatedAt: "2026-04-30",
+        note: "BBB accreditation link shown on St. Jude financials page.",
+      },
+    ],
+    ein: "62-0646012",
+    status501c3:
+      "St. Jude states it is a tax-exempt 501(c)(3) organization under the Internal Revenue Code.",
+    lastVerified: "2026-04-30",
+    notes:
+      "Pilot real-data profile sourced from stjude.org pages and linked third-party watchdog pages referenced by St. Jude.",
+  },
+  {
     id: "charity-001",
     slug: "river-city-food-network",
     name: "River City Food Network",

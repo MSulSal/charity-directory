@@ -54,7 +54,7 @@ function CharityExpandedCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-[11px] tracking-[0.14em] text-[var(--color-text-faint)] uppercase">
-            Sample charity record
+            {charity.sampleData ? "Sample charity record" : "Organization record"}
           </p>
           <h4 className="text-xl font-semibold text-[var(--color-text-strong)]">
             <Link
@@ -166,6 +166,8 @@ export function CategoryDropdownExplorer({
           const categoryCharities = charities.filter(
             (charity) => charity.categorySlug === category.slug,
           );
+          const realCount = categoryCharities.filter((charity) => !charity.sampleData).length;
+          const sampleCount = categoryCharities.filter((charity) => charity.sampleData).length;
 
           return (
             <details key={category.slug} className="dark-panel group" open={false}>
@@ -182,9 +184,11 @@ export function CategoryDropdownExplorer({
                   </p>
                 </div>
 
-                <div className="text-right text-xs text-[var(--color-text-faint)]">
+                <div className="w-full text-left text-xs text-[var(--color-text-faint)] sm:w-auto sm:text-right">
                   <p>{category.subcategories.length} subcategories</p>
-                  <p>{categoryCharities.length} sample charities</p>
+                  <p>
+                    {categoryCharities.length} listings ({realCount} real, {sampleCount} sample)
+                  </p>
                 </div>
               </summary>
 
@@ -210,7 +214,7 @@ export function CategoryDropdownExplorer({
                       <div className="space-y-3 border-t border-[var(--color-border-soft)] p-4">
                         {subcategoryCharities.length === 0 ? (
                           <p className="text-sm text-[var(--color-text-faint)]">
-                            No sample charities are mapped to this subcategory yet.
+                            No charities are mapped to this subcategory yet.
                           </p>
                         ) : (
                           subcategoryCharities.map((charity) => (

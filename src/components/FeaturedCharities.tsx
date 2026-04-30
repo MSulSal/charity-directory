@@ -18,10 +18,10 @@ export function FeaturedCharities({
     <section className="mx-auto w-full max-w-7xl space-y-8 px-6 py-14 sm:px-8 lg:px-10 lg:py-20">
       <div className="max-w-4xl space-y-3">
         <h2 className="font-semibold text-3xl leading-tight text-[var(--color-text-strong)] sm:text-4xl">
-          Featured Sample Charities
+          Featured Charity Profiles
         </h2>
         <p className="text-sm leading-7 text-[var(--color-text-muted)]">
-          These profiles are sample records for product prototyping. They demonstrate structured fields for trust and verification without asserting live third-party ratings.
+          This section mixes prototype sample records with pilot real-data records so we can tune card detail density, trust fields, and action links.
         </p>
       </div>
 
