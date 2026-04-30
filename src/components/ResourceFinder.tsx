@@ -68,20 +68,24 @@ export function ResourceFinder({
 
   const [query, setQuery] = useState(initialQuery);
   const [location, setLocation] = useState(initialLocation);
+  const [startPoint, setStartPoint] = useState("");
   const [radiusMiles, setRadiusMiles] = useState(initialRadiusMiles);
   const [subcategory, setSubcategory] = useState(initialSubcategory);
   const [wayToHelp, setWayToHelp] = useState<WayToHelp | "">(initialWayToHelp);
   const [verifiedOnly, setVerifiedOnly] = useState(initialVerifiedOnly);
+  const [showRoutes, setShowRoutes] = useState(true);
   const [serviceScale, setServiceScale] = useState<ServiceScale | "">(
     initialServiceScale,
   );
   const [populationServed, setPopulationServed] = useState(initialPopulationServed);
   const [activeQuery, setActiveQuery] = useState(initialQuery);
   const [activeLocation, setActiveLocation] = useState(initialLocation);
+  const [activeStartPoint, setActiveStartPoint] = useState("");
   const [activeRadiusMiles, setActiveRadiusMiles] = useState(initialRadiusMiles);
   const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
   const [activeWayToHelp, setActiveWayToHelp] = useState<WayToHelp | "">(initialWayToHelp);
   const [activeVerifiedOnly, setActiveVerifiedOnly] = useState(initialVerifiedOnly);
+  const [activeShowRoutes, setActiveShowRoutes] = useState(true);
   const [activeServiceScale, setActiveServiceScale] = useState<ServiceScale | "">(
     initialServiceScale,
   );
@@ -89,9 +93,11 @@ export function ResourceFinder({
     initialPopulationServed,
   );
   const [geocodedCenter, setGeocodedCenter] = useState<GeoPoint | null>(null);
+  const [geocodedStartCenter, setGeocodedStartCenter] = useState<GeoPoint | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(
     hasInitialSearch && !initialResolvedCenter,
   );
+  const [isGeocodingStart, setIsGeocodingStart] = useState(false);
   const [hasSearched, setHasSearched] = useState(hasInitialSearch);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -136,9 +142,40 @@ export function ResourceFinder({
     [datasetLocationCenter, geocodedCenter],
   );
 
+  const datasetStartCenter = useMemo(() => {
+    if (!hasSearched || !activeStartPoint.trim()) {
+      return null;
+    }
+
+    return resolveLocationQuery(activeStartPoint, charities);
+  }, [activeStartPoint, charities, hasSearched]);
+
+  const hasActiveStartPoint = activeStartPoint.trim().length > 0;
+
+  const startPointCenter = useMemo(() => {
+    if (!hasActiveStartPoint) {
+      return null;
+    }
+
+    return datasetStartCenter ?? geocodedStartCenter;
+  }, [datasetStartCenter, geocodedStartCenter, hasActiveStartPoint]);
+
   const withDistance = useMemo(
     () => withDistanceFrom(charities, locationCenter),
     [charities, locationCenter],
+  );
+
+  const withDistanceFromStart = useMemo(
+    () => withDistanceFrom(charities, startPointCenter),
+    [charities, startPointCenter],
+  );
+
+  const startDistanceByCharityId = useMemo(
+    () =>
+      new Map(
+        withDistanceFromStart.map(({ charity, distanceMiles }) => [charity.id, distanceMiles]),
+      ),
+    [withDistanceFromStart],
   );
 
   const filtered = useMemo(() => {
@@ -300,6 +337,54 @@ export function ResourceFinder({
   ]);
 
   useEffect(() => {
+    if (!hasSearched) {
+      return;
+    }
+
+    const trimmedStart = activeStartPoint.trim();
+
+    if (!trimmedStart) {
+      return;
+    }
+
+    if (datasetStartCenter) {
+      return;
+    }
+
+    const cacheKey = trimmedStart.toLowerCase();
+    if (geocodeCacheRef.current.has(cacheKey)) {
+      const cachedCenter = geocodeCacheRef.current.get(cacheKey) ?? null;
+      Promise.resolve().then(() => {
+        setGeocodedStartCenter(cachedCenter);
+        setIsGeocodingStart(false);
+      });
+      return;
+    }
+
+    const controller = new AbortController();
+
+    geocodeLocationQuery(trimmedStart, controller.signal)
+      .then((point) => {
+        geocodeCacheRef.current.set(cacheKey, point);
+        setGeocodedStartCenter(point);
+        setIsGeocodingStart(false);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        geocodeCacheRef.current.set(cacheKey, null);
+        setGeocodedStartCenter(null);
+        setIsGeocodingStart(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [activeStartPoint, datasetStartCenter, hasSearched]);
+
+  useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
       return;
     }
@@ -384,6 +469,22 @@ export function ResourceFinder({
       .addTo(markerLayer)
       .bindTooltip(`Search center: ${locationCenter.label}`);
 
+    const startLatLng = hasActiveStartPoint && startPointCenter
+      ? L.latLng(startPointCenter.latitude, startPointCenter.longitude)
+      : null;
+
+    if (startLatLng) {
+      L.circleMarker(startLatLng, {
+        radius: 6,
+        color: "#E8BE4B",
+        weight: 1,
+        fillColor: "#E56AA6",
+        fillOpacity: 0.95,
+      })
+        .addTo(markerLayer)
+        .bindTooltip(`Starting point: ${startPointCenter?.label ?? "Selected start"}`);
+    }
+
     mappableResults.slice(0, 80).forEach(({ charity, distanceMiles }) => {
       const markerLatLng = L.latLng(
         charity.contact.latitude as number,
@@ -392,8 +493,15 @@ export function ResourceFinder({
 
       bounds.extend(markerLatLng);
 
-      const distanceText =
-        distanceMiles === null
+      const startDistanceMiles = hasActiveStartPoint
+        ? startDistanceByCharityId.get(charity.id) ?? null
+        : null;
+
+      const distanceText = hasActiveStartPoint
+        ? startDistanceMiles === null
+          ? "Distance from start unavailable"
+          : `${startDistanceMiles.toFixed(1)} miles from start`
+        : distanceMiles === null
           ? "Distance unavailable"
           : `${distanceMiles.toFixed(1)} miles away`;
 
@@ -408,15 +516,28 @@ export function ResourceFinder({
       })
         .addTo(markerLayer)
         .bindTooltip(`${charity.name} • ${distanceText} • ${categoryLabel}`);
+
+      if (startLatLng && activeShowRoutes) {
+        L.polyline([startLatLng, markerLatLng], {
+          color: "#E8BE4B",
+          weight: 1,
+          opacity: 0.45,
+          dashArray: "4 4",
+        }).addTo(markerLayer);
+      }
     });
 
     map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
   }, [
     activeRadiusMiles,
+    activeShowRoutes,
     categoryMap,
+    hasActiveStartPoint,
     hasSearched,
     locationCenter,
     mappableResults,
+    startDistanceByCharityId,
+    startPointCenter,
   ]);
 
   function applySearch(event: React.FormEvent<HTMLFormElement>) {
@@ -431,16 +552,24 @@ export function ResourceFinder({
     }
 
     const localDatasetCenter = resolveLocationQuery(location.trim(), charities);
+    const trimmedStartPoint = startPoint.trim();
+    const localDatasetStartCenter = trimmedStartPoint
+      ? resolveLocationQuery(trimmedStartPoint, charities)
+      : null;
 
     setSearchError(null);
     setGeocodedCenter(null);
     setIsGeocoding(!localDatasetCenter);
+    setGeocodedStartCenter(null);
+    setIsGeocodingStart(Boolean(trimmedStartPoint) && !localDatasetStartCenter);
     setActiveQuery(query.trim());
     setActiveLocation(location.trim());
+    setActiveStartPoint(trimmedStartPoint);
     setActiveRadiusMiles(radiusMiles);
     setActiveSubcategory(subcategory);
     setActiveWayToHelp(wayToHelp);
     setActiveVerifiedOnly(verifiedOnly);
+    setActiveShowRoutes(showRoutes);
     setActiveServiceScale(serviceScale);
     setActivePopulationServed(populationServed);
     setHasSearched(true);
@@ -449,22 +578,28 @@ export function ResourceFinder({
   function resetFilters() {
     setQuery(initialQuery);
     setLocation(initialLocation);
+    setStartPoint("");
     setRadiusMiles(initialRadiusMiles);
     setSubcategory(initialSubcategory);
     setWayToHelp(initialWayToHelp);
     setVerifiedOnly(initialVerifiedOnly);
+    setShowRoutes(true);
     setServiceScale(initialServiceScale);
     setPopulationServed(initialPopulationServed);
     setActiveQuery(initialQuery);
     setActiveLocation(initialLocation);
+    setActiveStartPoint("");
     setActiveRadiusMiles(initialRadiusMiles);
     setActiveSubcategory(initialSubcategory);
     setActiveWayToHelp(initialWayToHelp);
     setActiveVerifiedOnly(initialVerifiedOnly);
+    setActiveShowRoutes(true);
     setActiveServiceScale(initialServiceScale);
     setActivePopulationServed(initialPopulationServed);
     setGeocodedCenter(null);
+    setGeocodedStartCenter(null);
     setIsGeocoding(false);
+    setIsGeocodingStart(false);
     setHasSearched(hasInitialSearch);
     setSearchError(null);
     setMobileResultsView("map");
@@ -497,6 +632,11 @@ export function ResourceFinder({
       <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
         {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
           const mapLinks = buildMapLinks(charity.contact, charity.name);
+          const startDistanceMiles = hasActiveStartPoint
+            ? startDistanceByCharityId.get(charity.id) ?? null
+            : null;
+          const displayDistanceMiles = hasActiveStartPoint ? startDistanceMiles : distanceMiles;
+          const distanceLabel = hasActiveStartPoint ? "miles from start" : "miles away";
 
           return (
             <li key={charity.id} className="space-y-2 p-3">
@@ -508,9 +648,9 @@ export function ResourceFinder({
                   {charity.name}
                 </Link>
                 <p className="text-xs text-[var(--color-text-faint)]">
-                  {distanceMiles === null
+                  {displayDistanceMiles === null
                     ? "Distance unavailable"
-                    : `${distanceMiles.toFixed(1)} miles away`}
+                    : `${displayDistanceMiles.toFixed(1)} ${distanceLabel}`}
                 </p>
               </div>
 
@@ -614,7 +754,7 @@ export function ResourceFinder({
                 className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
                 onSubmit={applySearch}
               >
-                <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
+                <div className="grid gap-3 lg:grid-cols-[1.1fr_170px_1fr_1fr_auto]">
                   <label className="text-xs text-[var(--color-text-muted)]">
                     <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
                     <input
@@ -638,6 +778,18 @@ export function ResourceFinder({
                         </option>
                       ))}
                     </select>
+                  </label>
+
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">
+                      Starting point (optional)
+                    </span>
+                    <input
+                      value={startPoint}
+                      onChange={(event) => setStartPoint(event.target.value)}
+                      placeholder="Address or ZIP for distance"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                    />
                   </label>
 
                   <label className="text-xs text-[var(--color-text-muted)]">
@@ -671,6 +823,15 @@ export function ResourceFinder({
                         ? "Looking up location..."
                         : "Location not recognized. Try a nearby city, state, or ZIP."}
                 </p>
+                {hasSearched && hasActiveStartPoint ? (
+                  <p className="mt-1 text-xs text-[var(--color-text-faint)]">
+                    {startPointCenter
+                      ? `Distance baseline: ${startPointCenter.label}`
+                      : isGeocodingStart
+                        ? "Looking up starting point..."
+                        : "Starting point not recognized. Distances are unavailable from start point."}
+                  </p>
+                ) : null}
               </form>
 
               <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
@@ -753,6 +914,17 @@ export function ResourceFinder({
                       />
                       Verified/listed only
                     </label>
+
+                    <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                      <input
+                        type="checkbox"
+                        checked={showRoutes}
+                        onChange={(event) => setShowRoutes(event.target.checked)}
+                        disabled={!startPoint.trim()}
+                        className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)] disabled:opacity-50"
+                      />
+                      Show route lines from starting point
+                    </label>
                   </div>
                 </details>
 
@@ -825,11 +997,16 @@ export function ResourceFinder({
                 <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
                   Matching organizations
                 </h3>
-                <p className="text-xs text-[var(--color-text-faint)]">
-                  {hasSearched
-                    ? `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`
-                    : "No search yet"}
-                </p>
+                <div className="text-right">
+                  <p className="text-xs text-[var(--color-text-faint)]">
+                    {hasSearched
+                      ? `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`
+                      : "No search yet"}
+                  </p>
+                  {hasActiveStartPoint ? (
+                    <p className="text-[11px] text-[var(--color-text-faint)]">Distance from start</p>
+                  ) : null}
+                </div>
               </div>
               <div className="space-y-4 overflow-y-auto p-4">{renderResultsList()}</div>
             </aside>
