@@ -718,34 +718,32 @@ export function ResourceFinder({
       </header>
 
       <div className="dark-panel overflow-hidden min-[1920px]:overflow-visible p-0">
-        {showResultsPanel ? (
-          <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
-            <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-              <button
-                type="button"
-                onClick={() => setMobileResultsView("map")}
-                className={`px-3 py-2 transition ${
-                  mobileResultsView === "map"
-                    ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
-                    : "hover:text-[var(--color-text-strong)]"
-                }`}
-              >
-                Map View
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileResultsView("list")}
-                className={`px-3 py-2 transition ${
-                  mobileResultsView === "list"
-                    ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
-                    : "hover:text-[var(--color-text-strong)]"
-                }`}
-              >
-                List View
-              </button>
-            </div>
+        <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
+          <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
+            <button
+              type="button"
+              onClick={() => setMobileResultsView("map")}
+              className={`px-3 py-2 transition ${
+                mobileResultsView === "map"
+                  ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
+                  : "hover:text-[var(--color-text-strong)]"
+              }`}
+            >
+              Map View
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileResultsView("list")}
+              className={`px-3 py-2 transition ${
+                mobileResultsView === "list"
+                  ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
+                  : "hover:text-[var(--color-text-strong)]"
+              }`}
+            >
+              List View
+            </button>
           </div>
-        ) : null}
+        </div>
 
         <div className="relative">
           <div
