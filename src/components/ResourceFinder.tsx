@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
-import { useIsIOSMobile } from "@/hooks/useIsIOSMobile";
+import { MapLinkOptions } from "@/components/MapLinkOptions";
 import {
   geocodeLocationQuery,
   resolveLocationQuery,
@@ -95,7 +95,7 @@ export function ResourceFinder({
   const [hasSearched, setHasSearched] = useState(hasInitialSearch);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
-  const isIOSMobile = useIsIOSMobile();
+  const [mobileResultsView, setMobileResultsView] = useState<"map" | "list">("map");
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
@@ -467,6 +467,87 @@ export function ResourceFinder({
     setIsGeocoding(false);
     setHasSearched(hasInitialSearch);
     setSearchError(null);
+    setMobileResultsView("map");
+  }
+
+  const hasLocationInput = location.trim().length > 0;
+
+  function renderResultsList() {
+    if (!hasSearched) {
+      return (
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Enter a location and press Find Resources to load matching organizations.
+        </p>
+      );
+    }
+
+    if (isGeocoding) {
+      return <p className="text-sm text-[var(--color-text-muted)]">Looking up location...</p>;
+    }
+
+    if (filtered.length === 0) {
+      return (
+        <p className="text-sm text-[var(--color-text-muted)]">
+          No resources found with the current location, radius, and filter settings.
+        </p>
+      );
+    }
+
+    return (
+      <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
+        {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
+          const mapLinks = buildMapLinks(charity.contact, charity.name);
+
+          return (
+            <li key={charity.id} className="space-y-2 p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <Link
+                  href={`/charities/${charity.slug}`}
+                  className="text-sm font-semibold text-[var(--color-text-strong)] transition hover:text-[var(--color-soft-amethyst)]"
+                >
+                  {charity.name}
+                </Link>
+                <p className="text-xs text-[var(--color-text-faint)]">
+                  {distanceMiles === null
+                    ? "Distance unavailable"
+                    : `${distanceMiles.toFixed(1)} miles away`}
+                </p>
+              </div>
+
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {categoryMap.get(charity.categorySlug) ?? "Uncategorized"} •{" "}
+                {[charity.contact.city, charity.contact.state].filter(Boolean).join(", ")} •{" "}
+                {charity.waysToHelp.join(", ")}
+              </p>
+
+              <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)]">
+                <Link
+                  href={`/charities/${charity.slug}`}
+                  className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                >
+                  View profile
+                </Link>
+                {charity.links.website ? (
+                  <a
+                    href={charity.links.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                  >
+                    Website
+                  </a>
+                ) : null}
+                <MapLinkOptions
+                  googleHref={mapLinks?.google}
+                  appleHref={mapLinks?.apple}
+                  anchorClassName="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    );
   }
 
   return (
@@ -481,323 +562,279 @@ export function ResourceFinder({
       </header>
 
       <div className="dark-panel overflow-hidden p-0">
-        <div className="relative h-[34rem] sm:h-[40rem] lg:h-[44rem]">
-          <div className="absolute inset-0 z-0 bg-[var(--color-surface-2)]">
-            <div ref={mapContainerRef} className="h-full w-full" />
+        {hasLocationInput ? (
+          <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
+            <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
+              <button
+                type="button"
+                onClick={() => setMobileResultsView("map")}
+                className={`px-3 py-2 transition ${
+                  mobileResultsView === "map"
+                    ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
+                    : "hover:text-[var(--color-text-strong)]"
+                }`}
+              >
+                Map View
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileResultsView("list")}
+                className={`px-3 py-2 transition ${
+                  mobileResultsView === "list"
+                    ? "bg-[var(--color-saffron)] text-[var(--color-obsidian)]"
+                    : "hover:text-[var(--color-text-strong)]"
+                }`}
+              >
+                List View
+              </button>
+            </div>
           </div>
+        ) : null}
 
-          <div className="pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
+        <div
+          className={
+            hasLocationInput
+              ? "lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
+              : ""
+          }
+        >
+          <div
+            className={`relative h-[34rem] sm:h-[40rem] lg:h-[44rem] ${
+              hasLocationInput && mobileResultsView === "list" ? "hidden lg:block" : "block"
+            }`}
+          >
+            <div className="absolute inset-0 z-0 bg-[var(--color-surface-2)]">
+              <div ref={mapContainerRef} className="h-full w-full" />
+            </div>
 
-          <div className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between">
-            <form
-              className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
-              onSubmit={applySearch}
-            >
-              <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
-                  <input
-                    value={location}
-                    onChange={(event) => setLocation(event.target.value)}
-                    placeholder="Enter city, state, or ZIP"
-                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-                  />
-                </label>
+            <div className="pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
 
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Radius</span>
-                  <select
-                    value={radiusMiles}
-                    onChange={(event) => setRadiusMiles(Number(event.target.value))}
-                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                  >
-                    {radiusOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option} miles
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-xs text-[var(--color-text-muted)]">
-                  <span className="mb-2 block uppercase tracking-wide">Keyword</span>
-                  <input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="food bank, legal aid, youth programs"
-                    className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  className="h-11 self-end border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
-                >
-                  Find Resources
-                </button>
-              </div>
-
-              {searchError ? (
-                <p className="mt-2 text-xs text-[var(--color-rose)]">{searchError}</p>
-              ) : null}
-
-              <p className="mt-3 text-xs text-[var(--color-text-faint)]">
-                {!hasSearched
-                  ? "Enter a location and run a search to activate map pins and nearby results."
-                  : locationCenter
-                    ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
-                    : isGeocoding
-                      ? "Looking up location..."
-                      : "Location not recognized. Try a nearby city, state, or ZIP."}
-              </p>
-            </form>
-
-            <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
-              <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
-                <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
-                  More filters
-                </summary>
-
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between">
+              <form
+                className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
+                onSubmit={applySearch}
+              >
+                <div className="grid gap-3 lg:grid-cols-[1.3fr_170px_1fr_auto]">
                   <label className="text-xs text-[var(--color-text-muted)]">
-                    <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
-                    <select
-                      value={subcategory}
-                      onChange={(event) => setSubcategory(event.target.value)}
-                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                    >
-                      <option value="">All subcategories</option>
-                      {subcategories.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="text-xs text-[var(--color-text-muted)]">
-                    <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
-                    <select
-                      value={wayToHelp}
-                      onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
-                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                    >
-                      <option value="">All ways</option>
-                      {waysToHelp.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="text-xs text-[var(--color-text-muted)]">
-                    <span className="mb-2 block uppercase tracking-wide">Service scope</span>
-                    <select
-                      value={serviceScale}
-                      onChange={(event) =>
-                        setServiceScale(event.target.value as ServiceScale | "")
-                      }
-                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                    >
-                      <option value="">All scopes</option>
-                      <option value="Local">Local</option>
-                      <option value="National">National</option>
-                      <option value="International">International</option>
-                    </select>
-                  </label>
-
-                  <label className="text-xs text-[var(--color-text-muted)]">
-                    <span className="mb-2 block uppercase tracking-wide">Population served</span>
-                    <select
-                      value={populationServed}
-                      onChange={(event) => setPopulationServed(event.target.value)}
-                      className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                    >
-                      <option value="">All populations</option>
-                      {populations.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Location or ZIP</span>
                     <input
-                      type="checkbox"
-                      checked={verifiedOnly}
-                      onChange={(event) => setVerifiedOnly(event.target.checked)}
-                      className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)]"
+                      value={location}
+                      onChange={(event) => setLocation(event.target.value)}
+                      placeholder="Enter city, state, or ZIP"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
                     />
-                    Verified/listed only
                   </label>
-                </div>
-              </details>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs text-[var(--color-text-faint)]">
-                  {hasSearched ? `${filtered.length} results` : "Search to see results"}
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  {showOpenPageLink ? (
-                    <Link
-                      href="/resource-finder"
-                      className="text-xs tracking-wide text-[var(--color-text-muted)] uppercase underline underline-offset-4 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Radius</span>
+                    <select
+                      value={radiusMiles}
+                      onChange={(event) => setRadiusMiles(Number(event.target.value))}
+                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                     >
-                      Open full resource finder page
-                    </Link>
-                  ) : null}
+                      {radiusOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option} miles
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="text-xs text-[var(--color-text-muted)]">
+                    <span className="mb-2 block uppercase tracking-wide">Keyword</span>
+                    <input
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="food bank, legal aid, youth programs"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                    />
+                  </label>
 
                   <button
-                    type="button"
-                    onClick={resetFilters}
-                    className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+                    type="submit"
+                    className="h-11 self-end border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
                   >
-                    Reset
+                    Find Resources
                   </button>
+                </div>
+
+                {searchError ? (
+                  <p className="mt-2 text-xs text-[var(--color-rose)]">{searchError}</p>
+                ) : null}
+
+                <p className="mt-3 text-xs text-[var(--color-text-faint)]">
+                  {!hasSearched
+                    ? "Enter a location and run a search to activate map pins and nearby results."
+                    : locationCenter
+                      ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
+                      : isGeocoding
+                        ? "Looking up location..."
+                        : "Location not recognized. Try a nearby city, state, or ZIP."}
+                </p>
+              </form>
+
+              <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
+                <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
+                  <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
+                    More filters
+                  </summary>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <label className="text-xs text-[var(--color-text-muted)]">
+                      <span className="mb-2 block uppercase tracking-wide">Subcategory</span>
+                      <select
+                        value={subcategory}
+                        onChange={(event) => setSubcategory(event.target.value)}
+                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      >
+                        <option value="">All subcategories</option>
+                        {subcategories.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="text-xs text-[var(--color-text-muted)]">
+                      <span className="mb-2 block uppercase tracking-wide">Ways to help</span>
+                      <select
+                        value={wayToHelp}
+                        onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
+                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      >
+                        <option value="">All ways</option>
+                        {waysToHelp.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="text-xs text-[var(--color-text-muted)]">
+                      <span className="mb-2 block uppercase tracking-wide">Service scope</span>
+                      <select
+                        value={serviceScale}
+                        onChange={(event) =>
+                          setServiceScale(event.target.value as ServiceScale | "")
+                        }
+                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      >
+                        <option value="">All scopes</option>
+                        <option value="Local">Local</option>
+                        <option value="National">National</option>
+                        <option value="International">International</option>
+                      </select>
+                    </label>
+
+                    <label className="text-xs text-[var(--color-text-muted)]">
+                      <span className="mb-2 block uppercase tracking-wide">Population served</span>
+                      <select
+                        value={populationServed}
+                        onChange={(event) => setPopulationServed(event.target.value)}
+                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      >
+                        <option value="">All populations</option>
+                        {populations.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                      <input
+                        type="checkbox"
+                        checked={verifiedOnly}
+                        onChange={(event) => setVerifiedOnly(event.target.checked)}
+                        className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)]"
+                      />
+                      Verified/listed only
+                    </label>
+                  </div>
+                </details>
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs text-[var(--color-text-faint)]">
+                    {hasSearched ? `${filtered.length} results` : "Search to see results"}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {showOpenPageLink ? (
+                      <Link
+                        href="/resource-finder"
+                        className="text-xs tracking-wide text-[var(--color-text-muted)] uppercase underline underline-offset-4 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
+                      >
+                        Open full resource finder page
+                      </Link>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+                    >
+                      Reset
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {!hasSearched ? (
+              <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
+                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                  Enter a city, state, or ZIP and press Find Resources.
+                </p>
+              </div>
+            ) : null}
+
+            {hasSearched && !locationCenter && !isGeocoding ? (
+              <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
+                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                  No location match found. Try a nearby city, state, or ZIP.
+                </p>
+              </div>
+            ) : null}
+
+            {hasSearched && !locationCenter && isGeocoding ? (
+              <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
+                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                  Looking up location...
+                </p>
+              </div>
+            ) : null}
+
+            {mapError ? (
+              <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
+                <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                  {mapError}
+                </p>
+              </div>
+            ) : null}
           </div>
 
-          {!hasSearched ? (
-            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                Enter a city, state, or ZIP and press Find Resources.
-              </p>
-            </div>
-          ) : null}
-
-          {hasSearched && !locationCenter && !isGeocoding ? (
-            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                No location match found. Try a nearby city, state, or ZIP.
-              </p>
-            </div>
-          ) : null}
-
-          {hasSearched && !locationCenter && isGeocoding ? (
-            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-              <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                Looking up location...
-              </p>
-            </div>
-          ) : null}
-
-          {mapError ? (
-            <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-              <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                {mapError}
-              </p>
-            </div>
+          {hasLocationInput ? (
+            <aside
+              className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/88%)] ${
+                mobileResultsView === "map" ? "hidden lg:flex" : "flex"
+              } flex-col lg:h-[44rem] lg:border-t-0 lg:border-l lg:border-l-[var(--color-border-soft)]`}
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-border-soft)] px-4 py-3">
+                <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
+                  Matching organizations
+                </h3>
+                <p className="text-xs text-[var(--color-text-faint)]">
+                  {hasSearched
+                    ? `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`
+                    : "No search yet"}
+                </p>
+              </div>
+              <div className="space-y-4 overflow-y-auto p-4">{renderResultsList()}</div>
+            </aside>
           ) : null}
         </div>
-      </div>
-
-      <div className="dark-panel space-y-4 p-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
-            Matching organizations
-          </h3>
-          <p className="text-xs text-[var(--color-text-faint)]">
-            {hasSearched
-              ? `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`
-              : "No search yet"}
-          </p>
-        </div>
-
-        {!hasSearched ? (
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Enter a location and press Find Resources to load matching organizations.
-          </p>
-        ) : isGeocoding ? (
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Looking up location...
-          </p>
-        ) : filtered.length === 0 ? (
-          <p className="text-sm text-[var(--color-text-muted)]">
-            No resources found with the current location, radius, and filter settings.
-          </p>
-        ) : (
-          <ul className="divide-y divide-[var(--color-border-soft)] border border-[var(--color-border)]">
-            {filtered.slice(0, 80).map(({ charity, distanceMiles }) => {
-              const mapLinks = buildMapLinks(charity.contact, charity.name);
-
-              return (
-                <li key={charity.id} className="space-y-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <Link
-                      href={`/charities/${charity.slug}`}
-                      className="text-sm font-semibold text-[var(--color-text-strong)] transition hover:text-[var(--color-soft-amethyst)]"
-                    >
-                      {charity.name}
-                    </Link>
-                    <p className="text-xs text-[var(--color-text-faint)]">
-                      {distanceMiles === null
-                        ? "Distance unavailable"
-                        : `${distanceMiles.toFixed(1)} miles away`}
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-[var(--color-text-muted)]">
-                    {categoryMap.get(charity.categorySlug) ?? "Uncategorized"} •{" "}
-                    {[charity.contact.city, charity.contact.state].filter(Boolean).join(", ")} •{" "}
-                    {charity.waysToHelp.join(", ")}
-                  </p>
-
-                  <div className="flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)]">
-                    <Link
-                      href={`/charities/${charity.slug}`}
-                      className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
-                    >
-                      View profile
-                    </Link>
-                    {charity.links.website ? (
-                      <a
-                        href={charity.links.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
-                      >
-                        Website
-                      </a>
-                    ) : null}
-                    {mapLinks && isIOSMobile ? (
-                      <>
-                        <a
-                          href={mapLinks.apple}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
-                        >
-                          Apple Maps
-                        </a>
-                        <a
-                          href={mapLinks.google}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
-                        >
-                          Google Maps
-                        </a>
-                      </>
-                    ) : mapLinks ? (
-                      <a
-                        href={mapLinks.google}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
-                      >
-                        View on Google Maps
-                      </a>
-                    ) : null}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
       </div>
     </section>
   );
