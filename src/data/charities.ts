@@ -597,4 +597,88 @@ export const charities: CharityOrganization[] = [
     status501c3: "Sample data: Marked as 501(c)(3) for design/testing.",
     lastVerified: "2026-04-11",
   },
+  {
+    id: "charity-011",
+    slug: "chicago-lights-social-service-center",
+    name: "Chicago Lights Social Service Center",
+    mission:
+      "Partner with Chicago adults to build brighter futures through food support, clothing resources, case management, and other services that help people pursue greater stability.",
+    sampleData: false,
+    categorySlug: "basic-needs-human-services",
+    subcategories: [
+      "Food banks & meal programs",
+      "Housing & homelessness",
+      "Poverty relief",
+    ],
+    populationServed: [
+      "Adults",
+      "Individuals and families",
+      "People experiencing housing instability",
+    ],
+    serviceScale: "Local",
+    serviceArea:
+      "Chicago service area with pantry appointments for ZIP codes 60601, 60602, 60603, 60604, 60606, 60610, 60611, 60654, and 60661",
+    contact: {
+      phone: "+1 (312) 640-2571",
+      email: "chicagolights@fourthchurch.org",
+      addressLine1: "126 E Chestnut St",
+      city: "Chicago",
+      state: "IL",
+      latitude: 41.8984525,
+      longitude: -87.6251783,
+      postalCode: "60611",
+      country: "USA",
+    },
+    links: {
+      website: "https://chicagolights.org/",
+      donate: "https://chicagolights.org/donate/",
+      donationFaq: "https://chicagolights.org/support-us/",
+      volunteer: "https://chicagolights.org/volunteer/social-service-center/",
+      form990:
+        "https://chicagolights.org/wp-content/uploads/2026/01/Chicago-Lights-990-2024-Final.pdf",
+    },
+    social: {
+      facebook: "https://www.facebook.com/chicagolights/",
+      youtube: "https://www.youtube.com/channel/UCc5xfkWKZ4Mm9y4hhfeF3XQ",
+    },
+    waysToHelp: ["Donate", "Volunteer", "Goods", "Events", "Get Help"],
+    goodsDonationInfo:
+      "Chicago Lights lists in-kind needs including clothing, shoes, coats, new underwear, backpacks, suitcases, and sturdy shopping bags for Social Service Center participants.",
+    verificationBadges: [
+      {
+        source: "Chicago Lights Financials",
+        label: "Audited financials and federal Form 990 links are published",
+        status: "listed",
+        url: "https://chicagolights.org/financials/",
+        updatedAt: "2026-04-30",
+      },
+      {
+        source: "IRS Form 990 (2023)",
+        label: "Form 990 shows 501(c)(3) tax-exempt status and EIN 36-3786331",
+        status: "listed",
+        url: "https://chicagolights.org/wp-content/uploads/2026/01/CHICAGO-LIGHTS_2023_990_Tax-Returns-Copy.pdf",
+        updatedAt: "2026-04-30",
+      },
+      {
+        source: "Greater Chicago Food Depository",
+        label: "Partner pantry listing includes location, phone, hours, and service ZIPs",
+        status: "listed",
+        url: "https://www.chicagosfoodbank.org/locations/chicago-lights/",
+        updatedAt: "2026-04-30",
+      },
+      {
+        source: "Chicago Lights About Us",
+        label: "Organization history states 501(c)(3) nonprofit status since 1991",
+        status: "listed",
+        url: "https://chicagolights.org/about-us/",
+        updatedAt: "2026-04-30",
+      },
+    ],
+    ein: "36-3786331",
+    status501c3:
+      "Chicago Lights materials and Form 990 indicate section 501(c)(3) tax-exempt status.",
+    lastVerified: "2026-04-30",
+    notes:
+      "Pilot real-data pantry profile sourced from Chicago Lights and Greater Chicago Food Depository pages.",
+  },
 ];

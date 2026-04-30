@@ -34,16 +34,6 @@ interface ResourceFinderProps {
 
 const radiusOptions = [5, 10, 25, 50, 100, 250, 500];
 
-function zoomForRadius(radiusMiles: number) {
-  if (radiusMiles <= 5) return 12;
-  if (radiusMiles <= 10) return 11;
-  if (radiusMiles <= 25) return 10;
-  if (radiusMiles <= 50) return 9;
-  if (radiusMiles <= 100) return 8;
-  if (radiusMiles <= 250) return 6;
-  return 5;
-}
-
 function isVetted(charity: CharityOrganization) {
   return charity.verificationBadges.some(
     (badge) => badge.status === "verified" || badge.status === "listed",
@@ -61,7 +51,7 @@ function buildMapUrl(charity: CharityOrganization) {
   ) {
     const lat = charity.contact.latitude;
     const lon = charity.contact.longitude;
-    return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;
   }
 
   const address = [
@@ -78,7 +68,7 @@ function buildMapUrl(charity: CharityOrganization) {
     return null;
   }
 
-  return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
 export function ResourceFinder({
@@ -398,7 +388,15 @@ export function ResourceFinder({
     }
 
     const centerLatLng = L.latLng(locationCenter.latitude, locationCenter.longitude);
-    const bounds = L.latLngBounds(centerLatLng, centerLatLng);
+    const radiusCircle = L.circle(centerLatLng, {
+      radius: activeRadiusMiles * 1609.344,
+      color: "#8C6BC4",
+      weight: 1,
+      fillColor: "#8C6BC4",
+      fillOpacity: 0.12,
+    }).addTo(markerLayer);
+
+    const bounds = radiusCircle.getBounds();
 
     L.circleMarker(centerLatLng, {
       radius: 7,
@@ -436,11 +434,7 @@ export function ResourceFinder({
         .bindTooltip(`${charity.name} • ${distanceText} • ${categoryLabel}`);
     });
 
-    if (mappableResults.length > 0) {
-      map.fitBounds(bounds, { padding: [24, 24] });
-    } else {
-      map.setView(centerLatLng, zoomForRadius(activeRadiusMiles));
-    }
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
   }, [
     activeRadiusMiles,
     categoryMap,
@@ -800,7 +794,7 @@ export function ResourceFinder({
                         rel="noopener noreferrer"
                         className="underline underline-offset-2 decoration-[var(--color-border)] transition hover:text-[var(--color-soft-amethyst)]"
                       >
-                        Open map
+                        View on Google Maps
                       </a>
                     ) : null}
                   </div>

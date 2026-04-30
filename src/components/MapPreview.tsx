@@ -15,11 +15,11 @@ function buildMapUrl(contact: ContactInfo, serviceArea: string) {
   if (contact.latitude !== undefined && contact.longitude !== undefined) {
     const lat = contact.latitude;
     const lon = contact.longitude;
-    return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;
   }
 
   const fallback = formatAddress(contact) || serviceArea;
-  return `https://www.openstreetmap.org/search?query=${encodeURIComponent(fallback)}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fallback)}`;
 }
 
 export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProps) {
@@ -150,7 +150,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
         rel="noopener noreferrer"
         className="inline-flex w-fit border border-[var(--color-border)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-strong)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
       >
-        Open in OpenStreetMap
+        View on Google Maps
       </a>
     </section>
   );
