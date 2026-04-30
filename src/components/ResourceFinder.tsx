@@ -985,7 +985,7 @@ export function ResourceFinder({
             <aside
               className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/92%)] ${
                 mobileResultsView === "map" ? "hidden lg:flex" : "flex"
-              } flex-col lg:mt-4 lg:border lg:border-[var(--color-border-soft)] min-[1920px]:absolute min-[1920px]:top-0 min-[1920px]:z-[1200] min-[1920px]:mt-0 min-[1920px]:h-[44rem] min-[1920px]:w-[18rem] min-[1920px]:right-[calc(-1*((100vw-100%)/4+9rem))]`}
+              } flex-col lg:mt-4 lg:border lg:border-[var(--color-border-soft)] min-[1920px]:absolute min-[1920px]:top-0 min-[1920px]:z-[1200] min-[1920px]:mt-0 min-[1920px]:h-[44rem] min-[1920px]:w-[18rem] min-[1920px]:left-[calc(100%+((100vw-100%)/4)-9rem)]`}
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-border-soft)] px-4 py-3">
                 <h3 className="text-lg font-semibold text-[var(--color-text-strong)]">
