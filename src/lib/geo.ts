@@ -77,22 +77,27 @@ export function resolveLocationQuery(
   }
 
   for (const charity of charities) {
-    const { city, state, latitude, longitude } = charity.contact;
+    const { city, state, postalCode, latitude, longitude } = charity.contact;
     if (latitude === undefined || longitude === undefined) {
       continue;
     }
 
     const cityState = normalize(`${city}, ${state}`);
     const cityOnly = normalize(city);
+    const normalizedPostal = postalCode ? normalize(postalCode) : "";
     if (
       cityState.includes(normalized) ||
       normalized.includes(cityState) ||
-      cityOnly === normalized
+      cityOnly === normalized ||
+      (normalizedPostal && normalizedPostal === normalized)
     ) {
+      const label = normalizedPostal && normalizedPostal === normalized
+        ? `${city}, ${state} ${postalCode}`
+        : `${city}, ${state}`;
       return {
         latitude,
         longitude,
-        label: `${city}, ${state}`,
+        label,
       };
     }
   }

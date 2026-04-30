@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { CharityCard } from "@/components/CharityCard";
@@ -34,6 +34,137 @@ interface ResourceFinderProps {
 
 const radiusOptions = [5, 10, 25, 50, 100, 250, 500];
 
+interface MapLatLngLiteral {
+  lat: number;
+  lng: number;
+}
+
+interface GoogleMapOptions {
+  center: MapLatLngLiteral;
+  zoom: number;
+  mapTypeControl: boolean;
+  streetViewControl: boolean;
+  fullscreenControl: boolean;
+}
+
+interface GoogleMapInstance {
+  setCenter(center: MapLatLngLiteral): void;
+  setZoom(zoom: number): void;
+  fitBounds(bounds: GoogleLatLngBoundsInstance): void;
+}
+
+interface GoogleMarkerOptions {
+  map: GoogleMapInstance;
+  position: MapLatLngLiteral;
+  title?: string;
+  icon?: {
+    path: unknown;
+    scale: number;
+    fillColor: string;
+    fillOpacity: number;
+    strokeColor: string;
+    strokeWeight: number;
+  };
+}
+
+interface GoogleMarkerInstance {
+  setMap(map: GoogleMapInstance | null): void;
+  addListener(eventName: string, handler: () => void): void;
+}
+
+interface GoogleInfoWindowInstance {
+  setContent(content: string): void;
+  open(options: {
+    map: GoogleMapInstance;
+    anchor: GoogleMarkerInstance;
+    shouldFocus?: boolean;
+  }): void;
+}
+
+interface GoogleLatLngBoundsInstance {
+  extend(latLng: MapLatLngLiteral): void;
+}
+
+interface GoogleMapsNamespace {
+  Map: new (element: HTMLElement, options: GoogleMapOptions) => GoogleMapInstance;
+  Marker: new (options: GoogleMarkerOptions) => GoogleMarkerInstance;
+  InfoWindow: new () => GoogleInfoWindowInstance;
+  LatLngBounds: new () => GoogleLatLngBoundsInstance;
+  SymbolPath: {
+    CIRCLE: unknown;
+  };
+}
+
+declare global {
+  interface Window {
+    google?: {
+      maps: GoogleMapsNamespace;
+    };
+    __charityDirectoryGoogleMapsPromise?: Promise<GoogleMapsNamespace>;
+  }
+}
+
+function loadGoogleMaps(apiKey: string): Promise<GoogleMapsNamespace> {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Google Maps can only load in the browser."));
+  }
+
+  if (window.google?.maps) {
+    return Promise.resolve(window.google.maps);
+  }
+
+  if (window.__charityDirectoryGoogleMapsPromise) {
+    return window.__charityDirectoryGoogleMapsPromise;
+  }
+
+  window.__charityDirectoryGoogleMapsPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(
+      "script[data-google-maps='charity-directory']",
+    ) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => {
+        if (window.google?.maps) {
+          resolve(window.google.maps);
+        } else {
+          reject(new Error("Google Maps API loaded without maps namespace."));
+        }
+      });
+      existingScript.addEventListener("error", () =>
+        reject(new Error("Failed to load Google Maps script.")),
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleMaps = "charity-directory";
+    script.onload = () => {
+      if (window.google?.maps) {
+        resolve(window.google.maps);
+      } else {
+        reject(new Error("Google Maps API loaded without maps namespace."));
+      }
+    };
+    script.onerror = () => reject(new Error("Failed to load Google Maps script."));
+    document.head.appendChild(script);
+  });
+
+  return window.__charityDirectoryGoogleMapsPromise;
+}
+
+function zoomForRadius(radiusMiles: number) {
+  if (radiusMiles <= 5) return 12;
+  if (radiusMiles <= 10) return 11;
+  if (radiusMiles <= 25) return 10;
+  if (radiusMiles <= 50) return 9;
+  if (radiusMiles <= 100) return 8;
+  if (radiusMiles <= 250) return 6;
+  return 5;
+}
+
 function isVetted(charity: CharityOrganization) {
   return charity.verificationBadges.some(
     (badge) => badge.status === "verified" || badge.status === "listed",
@@ -42,6 +173,51 @@ function isVetted(charity: CharityOrganization) {
 
 function uniq(values: string[]) {
   return Array.from(new Set(values)).sort();
+}
+
+function escapeHtml(text: string) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildDirectionsUrl(charity: CharityOrganization, originText: string) {
+  const params = new URLSearchParams({ api: "1", travelmode: "driving" });
+
+  if (
+    charity.contact.latitude !== undefined &&
+    charity.contact.longitude !== undefined
+  ) {
+    params.set(
+      "destination",
+      `${charity.contact.latitude},${charity.contact.longitude}`,
+    );
+  } else {
+    const address = [
+      charity.contact.addressLine1,
+      charity.contact.city,
+      charity.contact.state,
+      charity.contact.postalCode,
+      charity.contact.country,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    if (address) {
+      params.set("destination", address);
+    } else {
+      return null;
+    }
+  }
+
+  if (originText.trim()) {
+    params.set("origin", originText.trim());
+  }
+
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
 export function ResourceFinder({
@@ -59,14 +235,24 @@ export function ResourceFinder({
   initialPopulationServed = "",
   showOpenPageLink = false,
 }: ResourceFinderProps) {
+  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   const [query, setQuery] = useState(initialQuery);
   const [location, setLocation] = useState(initialLocation);
   const [radiusMiles, setRadiusMiles] = useState(initialRadiusMiles);
   const [subcategory, setSubcategory] = useState(initialSubcategory);
   const [wayToHelp, setWayToHelp] = useState<WayToHelp | "">(initialWayToHelp);
   const [verifiedOnly, setVerifiedOnly] = useState(initialVerifiedOnly);
-  const [serviceScale, setServiceScale] = useState<ServiceScale | "">(initialServiceScale);
+  const [serviceScale, setServiceScale] = useState<ServiceScale | "">(
+    initialServiceScale,
+  );
   const [populationServed, setPopulationServed] = useState(initialPopulationServed);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const googleMapRef = useRef<GoogleMapInstance | null>(null);
+  const googleMarkersRef = useRef<GoogleMarkerInstance[]>([]);
+  const infoWindowRef = useRef<GoogleInfoWindowInstance | null>(null);
 
   const categoryMap = useMemo(
     () =>
@@ -179,40 +365,158 @@ export function ResourceFinder({
     withDistance,
   ]);
 
-  const markers = useMemo(() => {
-    if (!locationCenter) {
-      return [] as Array<{ id: string; x: number; y: number; name: string; distance: number }>;
-    }
-
-    return filtered
-      .filter(({ charity, distanceMiles }) => {
+  const mappableResults = useMemo(
+    () =>
+      filtered.filter(({ charity, distanceMiles }) => {
         return (
           charity.contact.latitude !== undefined &&
           charity.contact.longitude !== undefined &&
           distanceMiles !== null
         );
-      })
-      .slice(0, 40)
-      .map(({ charity, distanceMiles }) => {
-        const position = toRelativeMarkerPosition(
-          locationCenter,
-          {
-            latitude: charity.contact.latitude as number,
-            longitude: charity.contact.longitude as number,
-            label: charity.name,
-          },
-          radiusMiles,
-        );
+      }),
+    [filtered],
+  );
 
-        return {
-          id: charity.id,
-          x: position.x,
-          y: position.y,
-          name: charity.name,
-          distance: distanceMiles as number,
-        };
+  const fallbackMarkers = useMemo(() => {
+    if (!locationCenter) {
+      return [] as Array<{ id: string; x: number; y: number; name: string; distance: number }>;
+    }
+
+    return mappableResults.slice(0, 40).map(({ charity, distanceMiles }) => {
+      const position = toRelativeMarkerPosition(
+        locationCenter,
+        {
+          latitude: charity.contact.latitude as number,
+          longitude: charity.contact.longitude as number,
+          label: charity.name,
+        },
+        radiusMiles,
+      );
+
+      return {
+        id: charity.id,
+        x: position.x,
+        y: position.y,
+        name: charity.name,
+        distance: distanceMiles as number,
+      };
+    });
+  }, [locationCenter, mappableResults, radiusMiles]);
+
+  useEffect(() => {
+    if (!mapsApiKey || !mapContainerRef.current) {
+      return;
+    }
+
+    let cancelled = false;
+
+    loadGoogleMaps(mapsApiKey)
+      .then((maps) => {
+        if (cancelled || !mapContainerRef.current || !maps) {
+          return;
+        }
+
+        setMapError(null);
+
+        const center = locationCenter
+          ? { lat: locationCenter.latitude, lng: locationCenter.longitude }
+          : { lat: 39.5, lng: -98.35 };
+
+        if (!googleMapRef.current) {
+          googleMapRef.current = new maps.Map(mapContainerRef.current, {
+            center,
+            zoom: locationCenter ? zoomForRadius(radiusMiles) : 4,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: true,
+          });
+          infoWindowRef.current = new maps.InfoWindow();
+        }
+
+        const map = googleMapRef.current;
+        map.setCenter(center);
+        map.setZoom(locationCenter ? zoomForRadius(radiusMiles) : 4);
+
+        googleMarkersRef.current.forEach((marker) => marker.setMap(null));
+        googleMarkersRef.current = [];
+
+        const bounds = new maps.LatLngBounds();
+
+        if (locationCenter) {
+          bounds.extend(center);
+
+          const originMarker = new maps.Marker({
+            map,
+            position: center,
+            title: `Search center: ${locationCenter.label}`,
+            icon: {
+              path: maps.SymbolPath.CIRCLE,
+              scale: 7,
+              fillColor: "#E8BE4B",
+              fillOpacity: 1,
+              strokeColor: "#0D0A12",
+              strokeWeight: 1,
+            },
+          });
+
+          googleMarkersRef.current.push(originMarker);
+        }
+
+        mappableResults.slice(0, 80).forEach(({ charity, distanceMiles }) => {
+          const marker = new maps.Marker({
+            map,
+            position: {
+              lat: charity.contact.latitude as number,
+              lng: charity.contact.longitude as number,
+            },
+            title: charity.name,
+          });
+
+          marker.addListener("click", () => {
+            if (!infoWindowRef.current) {
+              return;
+            }
+
+            const distanceText =
+              distanceMiles === null
+                ? "Distance unavailable"
+                : `${distanceMiles.toFixed(1)} miles away`;
+
+            infoWindowRef.current.setContent(
+              `<div style="font-family:Arial,sans-serif;color:#0D0A12;font-size:13px;line-height:1.4;"><strong>${escapeHtml(charity.name)}</strong><br/>${escapeHtml(distanceText)}</div>`,
+            );
+
+            infoWindowRef.current.open({ map, anchor: marker, shouldFocus: false });
+          });
+
+          googleMarkersRef.current.push(marker);
+          bounds.extend({
+            lat: charity.contact.latitude as number,
+            lng: charity.contact.longitude as number,
+          });
+        });
+
+        if (locationCenter && mappableResults.length > 0) {
+          map.fitBounds(bounds);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMapError(
+            "Google Maps failed to load. Check NEXT_PUBLIC_GOOGLE_MAPS_API_KEY and key restrictions.",
+          );
+        }
       });
-  }, [filtered, locationCenter, radiusMiles]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    locationCenter,
+    mappableResults,
+    mapsApiKey,
+    radiusMiles,
+  ]);
 
   function resetFilters() {
     setQuery(initialQuery);
@@ -244,7 +548,7 @@ export function ResourceFinder({
               <input
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-                placeholder="City, state or lat,lng"
+                placeholder="City, state, or ZIP"
                 className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
               />
             </label>
@@ -384,57 +688,89 @@ export function ResourceFinder({
                 ? `${locationCenter.label} • ${radiusMiles} mi radius`
                 : location.trim()
                   ? "Location not recognized"
-                  : "Enter a location to activate radius search"}
+                  : "Enter a location (city/state or ZIP) to activate radius search"}
             </p>
           </div>
 
-          <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[linear-gradient(180deg,#171125_0%,#100c19_100%)]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_28%,rgba(140,107,196,0.2)_0%,rgba(140,107,196,0)_58%)]" />
-            <div className="absolute left-1/2 top-1/2 h-[86%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
-            <div className="absolute left-1/2 top-1/2 h-[56%] w-[56%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
-            <div className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-saffron)]" />
+          {mapsApiKey ? (
+            <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)]">
+              <div ref={mapContainerRef} className="h-full w-full" />
+              {mapError ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(13_10_18/85%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
+                  {mapError}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="relative h-64 overflow-hidden border border-[var(--color-border)] bg-[linear-gradient(180deg,#171125_0%,#100c19_100%)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_28%,rgba(140,107,196,0.2)_0%,rgba(140,107,196,0)_58%)]" />
+              <div className="absolute left-1/2 top-1/2 h-[86%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
+              <div className="absolute left-1/2 top-1/2 h-[56%] w-[56%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-border-soft)]" />
+              <div className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-saffron)]" />
 
-            {locationCenter
-              ? markers.map((marker) => (
-                  <div
-                    key={marker.id}
-                    title={`${marker.name} (${marker.distance.toFixed(1)} mi)`}
-                    className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-text-strong)] bg-[var(--color-soft-amethyst)]"
-                    style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-                  />
-                ))
-              : null}
+              {locationCenter
+                ? fallbackMarkers.map((marker) => (
+                    <div
+                      key={marker.id}
+                      title={`${marker.name} (${marker.distance.toFixed(1)} mi)`}
+                      className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--color-text-strong)] bg-[var(--color-soft-amethyst)]"
+                      style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
+                    />
+                  ))
+                : null}
 
-            {!locationCenter ? (
-              <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
-                {location.trim()
-                  ? "No coordinate match found for this location. Try 'City, ST' or lat,lng."
-                  : "Set a location to see nearby charities plotted on the map."}
+              {!locationCenter ? (
+                <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--color-text-faint)]">
+                  {location.trim()
+                    ? "No location match found yet. Try city/state or ZIP."
+                    : "Set a location to see nearby charities plotted on the map."}
+                </div>
+              ) : null}
+
+              <div className="absolute bottom-2 right-2 rounded border border-[var(--color-border)] bg-[rgb(13_10_18/85%)] px-2 py-1 text-[10px] text-[var(--color-text-faint)]">
+                Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for live Google map pins
               </div>
-            ) : null}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
-        {filtered.map(({ charity, distanceMiles }) => (
-          <div key={charity.id} className="space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-              <p className="text-xs text-[var(--color-text-faint)]">
-                {distanceMiles === null
-                  ? "Distance unavailable"
-                  : `${distanceMiles.toFixed(1)} miles away`}
-              </p>
-              <p className="text-xs text-[var(--color-text-faint)]">
-                {categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
-              </p>
+        {filtered.map(({ charity, distanceMiles }) => {
+          const directionsUrl = buildDirectionsUrl(charity, location);
+
+          return (
+            <div key={charity.id} className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                <p className="text-xs text-[var(--color-text-faint)]">
+                  {distanceMiles === null
+                    ? "Distance unavailable"
+                    : `${distanceMiles.toFixed(1)} miles away`}
+                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-xs text-[var(--color-text-faint)]">
+                    {categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
+                  </p>
+                  {directionsUrl ? (
+                    <a
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[var(--color-text-muted)] underline underline-offset-2 decoration-[var(--color-border)] hover:text-[var(--color-soft-amethyst)]"
+                    >
+                      Directions
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+
+              <CharityCard
+                charity={charity}
+                categoryName={categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
+              />
             </div>
-            <CharityCard
-              charity={charity}
-              categoryName={categoryMap.get(charity.categorySlug) ?? "Uncategorized"}
-            />
-          </div>
-        ))}
+          );
+        })}
 
         {filtered.length === 0 ? (
           <div className="dark-panel col-span-full p-8 text-sm text-[var(--color-text-muted)]">
