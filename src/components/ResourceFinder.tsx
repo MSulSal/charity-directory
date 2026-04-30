@@ -606,7 +606,8 @@ export function ResourceFinder({
   }
 
   const showResultsPanel = hasSearched && activeLocation.trim().length > 0;
-  const showMapCanvas = !showResultsPanel || mobileResultsView === "map";
+  const isMobileListView = showResultsPanel && mobileResultsView === "list";
+  const showMapCanvas = !isMobileListView;
 
   useEffect(() => {
     if (!showMapCanvas || !mapRef.current) {
@@ -747,7 +748,11 @@ export function ResourceFinder({
         ) : null}
 
         <div className="relative">
-          <div className="relative h-[56rem] sm:h-[52rem] lg:h-[44rem]">
+          <div
+            className={`relative lg:h-[44rem] ${
+              isMobileListView ? "h-auto" : "h-[56rem] sm:h-[52rem]"
+            }`}
+          >
             <div
               className={`absolute inset-0 z-0 bg-[var(--color-surface-2)] ${
                 !showMapCanvas ? "invisible lg:visible" : ""
@@ -762,7 +767,13 @@ export function ResourceFinder({
               }`}
             />
 
-            <div className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between">
+            <div
+              className={`pointer-events-none z-[1100] flex flex-col ${
+                isMobileListView
+                  ? "relative"
+                  : "absolute inset-0 justify-between"
+              }`}
+            >
               <form
                 className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
                 onSubmit={applySearch}
@@ -967,7 +978,7 @@ export function ResourceFinder({
               </div>
             </div>
 
-            {hasSearched && !locationCenter && !isGeocoding ? (
+            {showMapCanvas && hasSearched && !locationCenter && !isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   No location match found. Try a nearby city, state, or ZIP.
@@ -975,7 +986,7 @@ export function ResourceFinder({
               </div>
             ) : null}
 
-            {hasSearched && !locationCenter && isGeocoding ? (
+            {showMapCanvas && hasSearched && !locationCenter && isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   Looking up location...
@@ -983,7 +994,7 @@ export function ResourceFinder({
               </div>
             ) : null}
 
-            {mapError ? (
+            {showMapCanvas && mapError ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   {mapError}
