@@ -701,7 +701,7 @@ export function ResourceFinder({
         </p>
       </header>
 
-      <div className="dark-panel overflow-hidden p-0">
+      <div className="dark-panel overflow-hidden min-[1920px]:overflow-visible p-0">
         {showResultsPanel ? (
           <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
             <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
