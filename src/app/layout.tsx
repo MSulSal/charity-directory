@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { SiteShell } from "@/components/layout/SiteShell";
 import "leaflet/dist/leaflet.css";
@@ -26,6 +26,15 @@ export const metadata: Metadata = {
       "Discover trusted nonprofits, donation links, volunteer options, and local help by cause and location.",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  colorScheme: "dark",
+  themeColor: "#0d0a12",
 };
 
 export default function RootLayout({

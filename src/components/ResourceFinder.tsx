@@ -606,6 +606,21 @@ export function ResourceFinder({
   }
 
   const showResultsPanel = hasSearched && activeLocation.trim().length > 0;
+  const showMapCanvas = !showResultsPanel || mobileResultsView === "map";
+
+  useEffect(() => {
+    if (!showMapCanvas || !mapRef.current) {
+      return;
+    }
+
+    const handle = window.setTimeout(() => {
+      mapRef.current?.invalidateSize();
+    }, 80);
+
+    return () => {
+      window.clearTimeout(handle);
+    };
+  }, [showMapCanvas]);
 
   function renderResultsList() {
     if (!hasSearched) {
@@ -732,16 +747,20 @@ export function ResourceFinder({
         ) : null}
 
         <div className="relative">
-          <div
-            className={`relative h-[34rem] sm:h-[40rem] lg:h-[44rem] ${
-              showResultsPanel && mobileResultsView === "list" ? "hidden lg:block" : "block"
-            }`}
-          >
-            <div className="absolute inset-0 z-0 bg-[var(--color-surface-2)]">
+          <div className="relative h-[56rem] sm:h-[52rem] lg:h-[44rem]">
+            <div
+              className={`absolute inset-0 z-0 bg-[var(--color-surface-2)] ${
+                !showMapCanvas ? "invisible lg:visible" : ""
+              }`}
+            >
               <div ref={mapContainerRef} className="h-full w-full" />
             </div>
 
-            <div className="pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)]" />
+            <div
+              className={`pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)] ${
+                !showMapCanvas ? "invisible lg:visible" : ""
+              }`}
+            />
 
             <div className="pointer-events-none absolute inset-0 z-[1100] flex flex-col justify-between">
               <form
@@ -808,15 +827,15 @@ export function ResourceFinder({
                   <p className="mt-2 text-xs text-[var(--color-rose)]">{searchError}</p>
                 ) : null}
 
-                <p className="mt-3 text-xs text-[var(--color-text-faint)]">
-                  {!hasSearched
-                    ? "Enter a location and run a search to activate map pins and nearby results."
-                    : locationCenter
+                {hasSearched ? (
+                  <p className="mt-3 text-xs text-[var(--color-text-faint)]">
+                    {locationCenter
                       ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
                       : isGeocoding
                         ? "Looking up location..."
                         : "Location not recognized. Try a nearby city, state, or ZIP."}
-                </p>
+                  </p>
+                ) : null}
                 {hasSearched && hasActiveStartPoint ? (
                   <p className="mt-1 text-xs text-[var(--color-text-faint)]">
                     {startPointCenter
@@ -947,14 +966,6 @@ export function ResourceFinder({
                 </div>
               </div>
             </div>
-
-            {!hasSearched ? (
-              <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                  Enter a city, state, or ZIP and press Find Resources.
-                </p>
-              </div>
-            ) : null}
 
             {hasSearched && !locationCenter && !isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
