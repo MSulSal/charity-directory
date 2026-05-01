@@ -640,7 +640,7 @@ export function ResourceFinder({
   }
 
   const showResultsPanel = hasSearched && activeLocation.trim().length > 0;
-  const isMobileListView = showResultsPanel && mobileResultsView === "list";
+  const isMobileListView = mobileResultsView === "list";
   const showMapCanvas = !isMobileListView;
 
   useEffect(() => {
