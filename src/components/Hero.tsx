@@ -3,11 +3,11 @@ import { SearchBar } from "@/components/SearchBar";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-[var(--color-border-soft)] bg-[#09070e] text-[var(--color-text-strong)]">
+    <section className="relative overflow-hidden border-b border-[var(--color-border-soft)] bg-[var(--color-hero-bg)] text-[var(--color-text-strong)]">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,10,18,0.4)_0%,rgba(9,7,14,0.95)_68%)]" />
-        <div className="absolute -top-28 left-1/2 h-64 w-64 -translate-x-1/2 bg-[radial-gradient(circle,rgba(140,107,196,0.2)_0%,rgba(140,107,196,0)_72%)]" />
-        <div className="absolute right-[10%] top-14 h-40 w-40 bg-[radial-gradient(circle,rgba(229,106,166,0.1)_0%,rgba(229,106,166,0)_75%)]" />
+        <div className="absolute inset-0 bg-[image:var(--color-hero-overlay-gradient)]" />
+        <div className="absolute -top-28 left-1/2 h-64 w-64 -translate-x-1/2 bg-[image:var(--color-hero-glow-primary)]" />
+        <div className="absolute right-[10%] top-14 h-40 w-40 bg-[image:var(--color-hero-glow-secondary)]" />
       </div>
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 py-16 sm:px-8 lg:px-10 lg:py-24">
         <div className="max-w-4xl space-y-5">

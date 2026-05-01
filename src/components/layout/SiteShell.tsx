@@ -9,7 +9,7 @@ interface SiteShellProps {
 
 export function SiteShell({ children }: SiteShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--color-obsidian)] text-[var(--color-text-strong)]">
+    <div className="flex min-h-screen flex-col bg-[var(--color-page-bg-solid)] text-[var(--color-text-strong)]">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

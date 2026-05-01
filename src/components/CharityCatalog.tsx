@@ -79,12 +79,12 @@ export function CharityCatalog({
               value={filters.query}
               onChange={(event) => setFilters({ ...filters, query: event.target.value })}
               placeholder="e.g. food bank, scholarships, legal aid"
-              className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+              className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
             />
           </label>
           <label className="text-sm text-[var(--color-text-muted)]">
             <span className="mb-2 block font-medium">Result count</span>
-            <div className="flex h-11 items-center border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)]">
+            <div className="flex h-11 items-center border border-[var(--color-border)] bg-[var(--color-field-bg)] px-3 text-sm text-[var(--color-text-strong)]">
               {filteredCharities.length} matches
             </div>
           </label>

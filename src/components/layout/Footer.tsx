@@ -12,7 +12,7 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-[var(--color-border-soft)] bg-[rgb(13_10_18/85%)]">
+    <footer className="mt-24 border-t border-[var(--color-border-soft)] bg-[var(--color-footer-bg)]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10 sm:px-8 lg:px-10">
         <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-[var(--color-text-muted)]">
           {footerLinks.map((link) => (

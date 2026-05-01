@@ -8,7 +8,7 @@ const statusStyles: Record<string, string> = {
   verified: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
   listed: "border-blue-500/40 bg-blue-500/15 text-blue-300",
   "self-reported": "border-amber-500/40 bg-amber-500/15 text-amber-300",
-  pending: "border-[var(--color-border)] bg-[rgb(13_10_18/65%)] text-[var(--color-text-faint)]",
+  pending: "border-[var(--color-border)] bg-[var(--color-soft-panel-bg)] text-[var(--color-text-faint)]",
 };
 
 function statusLabel(status: VerificationBadge["status"]) {

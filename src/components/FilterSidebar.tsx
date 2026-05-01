@@ -43,7 +43,7 @@ export function FilterSidebar({
         <select
           value={filters.subcategory}
           onChange={(event) => update("subcategory", event.target.value)}
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
         >
           <option value="">All subcategories</option>
           {subcategories.map((subcategory) => (
@@ -61,7 +61,7 @@ export function FilterSidebar({
           value={filters.location}
           onChange={(event) => update("location", event.target.value)}
           placeholder="City, state, or ZIP"
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
         />
       </label>
 
@@ -70,7 +70,7 @@ export function FilterSidebar({
         <select
           value={filters.wayToHelp}
           onChange={(event) => update("wayToHelp", event.target.value as WayToHelp | "")}
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
         >
           <option value="">All ways to help</option>
           {waysToHelp.map((way) => (
@@ -86,7 +86,7 @@ export function FilterSidebar({
         <select
           value={filters.verifiedOnly ? "yes" : "all"}
           onChange={(event) => update("verifiedOnly", event.target.value === "yes")}
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
         >
           <option value="all">All profiles</option>
           <option value="yes">Verified or listed only</option>
@@ -100,7 +100,7 @@ export function FilterSidebar({
           onChange={(event) =>
             update("serviceScale", event.target.value as ServiceScale | "")
           }
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
         >
           <option value="">All scopes</option>
           {serviceScaleOptions.map((scale) => (
@@ -116,7 +116,7 @@ export function FilterSidebar({
         <select
           value={filters.populationServed}
           onChange={(event) => update("populationServed", event.target.value)}
-          className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+          className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
         >
           <option value="">All populations</option>
           {populations.map((population) => (

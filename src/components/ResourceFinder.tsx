@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -719,7 +719,7 @@ export function ResourceFinder({
 
       <div className="dark-panel overflow-hidden min-[1920px]:overflow-visible p-0">
         <div className="border-b border-[var(--color-border-soft)] px-4 py-3 lg:hidden">
-          <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[rgb(13_10_18/72%)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
+          <div className="grid grid-cols-2 border border-[var(--color-border)] bg-[var(--color-toggle-bg)] p-1 text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
             <button
               type="button"
               onClick={() => setMobileResultsView("map")}
@@ -760,7 +760,7 @@ export function ResourceFinder({
             </div>
 
             <div
-              className={`pointer-events-none absolute inset-0 z-[900] bg-[linear-gradient(180deg,rgba(7,5,11,0.82)_0%,rgba(7,5,11,0.38)_28%,rgba(7,5,11,0.18)_52%,rgba(7,5,11,0.78)_100%)] ${
+              className={`pointer-events-none absolute inset-0 z-[900] bg-[image:var(--color-map-fade-gradient)] ${
                 !showMapCanvas ? "invisible lg:visible" : ""
               }`}
             />
@@ -773,7 +773,7 @@ export function ResourceFinder({
               }`}
             >
               <form
-                className="pointer-events-auto border-b border-[var(--color-border)] bg-[rgb(7_5_11/78%)] p-4 backdrop-blur-sm sm:p-5"
+                className="pointer-events-auto border-b border-[var(--color-border)] bg-[var(--color-overlay-panel)] p-4 backdrop-blur-sm sm:p-5"
                 onSubmit={applySearch}
               >
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.05fr)_160px_minmax(0,1fr)_minmax(0,1fr)_auto]">
@@ -783,7 +783,7 @@ export function ResourceFinder({
                       value={location}
                       onChange={(event) => setLocation(event.target.value)}
                       placeholder="Enter city, state, or ZIP"
-                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
                     />
                   </label>
 
@@ -792,7 +792,7 @@ export function ResourceFinder({
                     <select
                       value={radiusMiles}
                       onChange={(event) => setRadiusMiles(Number(event.target.value))}
-                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                     >
                       {radiusOptions.map((option) => (
                         <option key={option} value={option}>
@@ -810,7 +810,7 @@ export function ResourceFinder({
                       value={startPoint}
                       onChange={(event) => setStartPoint(event.target.value)}
                       placeholder="Address or ZIP for distance"
-                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
                     />
                   </label>
 
@@ -820,7 +820,7 @@ export function ResourceFinder({
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="food bank, legal aid, youth programs"
-                      className="h-11 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+                      className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
                     />
                   </label>
 
@@ -856,8 +856,8 @@ export function ResourceFinder({
                 ) : null}
               </form>
 
-              <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[rgb(7_5_11/80%)] p-4 backdrop-blur-sm sm:p-5">
-                <details className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] p-3">
+              <div className="pointer-events-auto space-y-3 border-t border-[var(--color-border)] bg-[var(--color-overlay-panel-alt)] p-4 backdrop-blur-sm sm:p-5">
+                <details className="border border-[var(--color-border)] bg-[var(--color-soft-panel-bg)] p-3">
                   <summary className="cursor-pointer text-xs tracking-wide text-[var(--color-text-muted)] uppercase">
                     More filters
                   </summary>
@@ -868,7 +868,7 @@ export function ResourceFinder({
                       <select
                         value={subcategory}
                         onChange={(event) => setSubcategory(event.target.value)}
-                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                       >
                         <option value="">All subcategories</option>
                         {subcategories.map((item) => (
@@ -884,7 +884,7 @@ export function ResourceFinder({
                       <select
                         value={wayToHelp}
                         onChange={(event) => setWayToHelp(event.target.value as WayToHelp | "")}
-                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                       >
                         <option value="">All ways</option>
                         {waysToHelp.map((item) => (
@@ -902,7 +902,7 @@ export function ResourceFinder({
                         onChange={(event) =>
                           setServiceScale(event.target.value as ServiceScale | "")
                         }
-                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                       >
                         <option value="">All scopes</option>
                         <option value="Local">Local</option>
@@ -916,7 +916,7 @@ export function ResourceFinder({
                       <select
                         value={populationServed}
                         onChange={(event) => setPopulationServed(event.target.value)}
-                        className="h-10 w-full border border-[var(--color-border)] bg-[rgb(13_10_18/88%)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
                       >
                         <option value="">All populations</option>
                         {populations.map((item) => (
@@ -932,7 +932,7 @@ export function ResourceFinder({
                         type="checkbox"
                         checked={verifiedOnly}
                         onChange={(event) => setVerifiedOnly(event.target.checked)}
-                        className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)]"
+                        className="h-4 w-4 border-[var(--color-border)] bg-[var(--color-field-bg-strong)]"
                       />
                       Verified/listed only
                     </label>
@@ -943,7 +943,7 @@ export function ResourceFinder({
                         checked={showRoutes}
                         onChange={(event) => setShowRoutes(event.target.checked)}
                         disabled={!startPoint.trim()}
-                        className="h-4 w-4 border-[var(--color-border)] bg-[rgb(13_10_18/88%)] disabled:opacity-50"
+                        className="h-4 w-4 border-[var(--color-border)] bg-[var(--color-field-bg-strong)] disabled:opacity-50"
                       />
                       Show route lines from starting point
                     </label>
@@ -978,7 +978,7 @@ export function ResourceFinder({
 
             {showMapCanvas && hasSearched && !locationCenter && !isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                <p className="max-w-md border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   No location match found. Try a nearby city, state, or ZIP.
                 </p>
               </div>
@@ -986,7 +986,7 @@ export function ResourceFinder({
 
             {showMapCanvas && hasSearched && !locationCenter && isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-                <p className="max-w-md border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                <p className="max-w-md border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   Looking up location...
                 </p>
               </div>
@@ -994,7 +994,7 @@ export function ResourceFinder({
 
             {showMapCanvas && mapError ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
-                <p className="max-w-lg border border-[var(--color-border)] bg-[rgb(7_5_11/88%)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
+                <p className="max-w-lg border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   {mapError}
                 </p>
               </div>
@@ -1003,7 +1003,7 @@ export function ResourceFinder({
 
           {showResultsPanel ? (
             <aside
-              className={`border-t border-[var(--color-border-soft)] bg-[rgb(7_5_11/92%)] ${
+              className={`border-t border-[var(--color-border-soft)] bg-[var(--color-results-panel-bg)] ${
                 mobileResultsView === "map" ? "hidden lg:flex" : "flex"
               } flex-col lg:mt-4 lg:border lg:border-[var(--color-border-soft)] min-[1920px]:absolute min-[1920px]:top-0 min-[1920px]:z-[1200] min-[1920px]:mt-0 min-[1920px]:h-[44rem] min-[1920px]:w-[18rem] min-[1920px]:left-[calc(100%+((100vw-100%)/4)-9rem)]`}
             >

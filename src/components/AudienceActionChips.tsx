@@ -15,7 +15,7 @@ export function AudienceActionChips() {
         <li key={action.label}>
           <Link
             href={action.href}
-            className="inline-flex border border-[var(--color-border)] bg-[rgb(22_17_31/72%)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-muted)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+            className="inline-flex border border-[var(--color-border)] bg-[var(--color-chip-bg)] px-3 py-2 text-xs font-medium tracking-wide text-[var(--color-text-muted)] uppercase transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
           >
             {action.label}
           </Link>

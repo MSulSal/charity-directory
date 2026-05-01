@@ -50,7 +50,7 @@ export function CharityCard({ charity, categoryName }: CharityCardProps) {
           </p>
         </div>
 
-        <span className="border border-[var(--color-border)] bg-[rgb(13_10_18/65%)] px-2 py-1 text-[11px] tracking-wide text-[var(--color-text-faint)] uppercase">
+        <span className="border border-[var(--color-border)] bg-[var(--color-soft-panel-bg)] px-2 py-1 text-[11px] tracking-wide text-[var(--color-text-faint)] uppercase">
           Last verified {formatDate(charity.lastVerified)}
         </span>
       </div>

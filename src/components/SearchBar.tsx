@@ -57,7 +57,7 @@ export function SearchBar({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="e.g. food bank, mental health, legal aid"
-          className="h-12 border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+          className="h-12 border border-[var(--color-border)] bg-[var(--color-field-bg)] px-3 text-sm text-[var(--color-text-strong)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
         />
       </label>
 
@@ -68,7 +68,7 @@ export function SearchBar({
           value={location}
           onChange={(event) => setLocation(event.target.value)}
           placeholder="City, state, or ZIP"
-          className="h-12 border border-[var(--color-border)] bg-[rgb(13_10_18/75%)] px-3 text-sm text-[var(--color-text-strong)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
+          className="h-12 border border-[var(--color-border)] bg-[var(--color-field-bg)] px-3 text-sm text-[var(--color-text-strong)] outline-none transition placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
         />
       </label>
 

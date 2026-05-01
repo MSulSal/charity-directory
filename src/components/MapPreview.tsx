@@ -125,12 +125,12 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
       <div className="relative overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)]">
         <div ref={mapContainerRef} className="h-80 w-full" />
         {!coordinates ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgb(7_5_11/52%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--color-map-overlay-soft)] px-6 text-center text-sm text-[var(--color-text-faint)]">
             Exact coordinates unavailable. Map is centered to the U.S. by default.
           </div>
         ) : null}
         {mapError ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgb(7_5_11/72%)] px-6 text-center text-sm text-[var(--color-text-faint)]">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--color-map-overlay-strong)] px-6 text-center text-sm text-[var(--color-text-faint)]">
             {mapError}
           </div>
         ) : null}
