@@ -22,8 +22,8 @@
     sans-serif;
 
   --color-page-bg-solid: #f5f1eb;
-  --body-glow-1: rgb(91 46 145 / 14%);
-  --body-glow-2: rgb(229 106 166 / 8%);
+  --body-glow-1: rgb(91 46 145 / 6%);
+  --body-glow-2: rgb(229 106 166 / 3%);
   --body-grad-start: #faf6ef;
   --body-grad-mid: #f3ece2;
   --body-grad-end: #ece3d8;
@@ -41,17 +41,17 @@
   --color-hero-bg: #f4ede4;
   --color-hero-overlay-gradient: linear-gradient(
     180deg,
-    rgba(245, 241, 235, 0.35) 0%,
-    rgba(245, 241, 235, 0.86) 72%
+    rgba(245, 241, 235, 0.16) 0%,
+    rgba(245, 241, 235, 0.74) 72%
   );
   --color-hero-glow-primary: radial-gradient(
     circle,
-    rgba(91, 46, 145, 0.2) 0%,
+    rgba(91, 46, 145, 0.08) 0%,
     rgba(91, 46, 145, 0) 72%
   );
   --color-hero-glow-secondary: radial-gradient(
     circle,
-    rgba(229, 106, 166, 0.12) 0%,
+    rgba(229, 106, 166, 0.04) 0%,
     rgba(229, 106, 166, 0) 75%
   );
 
