@@ -22,6 +22,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
   const isIOSMobile = useIsIOSMobile();
   const { resolvedStyle: resolvedMapStyle } = useResolvedMapStyle();
 
@@ -67,6 +68,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
 
         mapRef.current = map;
         markerLayerRef.current = L.layerGroup().addTo(map);
+        setIsMapReady(true);
       })
       .catch(() => {
         if (!cancelled) {
@@ -84,6 +86,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
         mapRef.current.remove();
         mapRef.current = null;
       }
+      setIsMapReady(false);
       markerLayerRef.current = null;
       leafletRef.current = null;
     };
@@ -108,7 +111,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
       subdomains: tileConfig.subdomains,
       maxZoom: tileConfig.maxZoom,
     }).addTo(map);
-  }, [resolvedMapStyle]);
+  }, [isMapReady, resolvedMapStyle]);
 
   useEffect(() => {
     const map = mapRef.current;

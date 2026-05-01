@@ -110,6 +110,7 @@ export function ResourceFinder({
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [mobileResultsView, setMobileResultsView] = useState<"map" | "list">("map");
+  const [isMapReady, setIsMapReady] = useState(false);
   const {
     preference: mapStylePreference,
     resolvedStyle: resolvedMapStyle,
@@ -423,6 +424,7 @@ export function ResourceFinder({
 
         mapRef.current = map;
         markerLayerRef.current = L.layerGroup().addTo(map);
+        setIsMapReady(true);
       })
       .catch(() => {
         if (!cancelled) {
@@ -440,6 +442,7 @@ export function ResourceFinder({
         mapRef.current.remove();
         mapRef.current = null;
       }
+      setIsMapReady(false);
       markerLayerRef.current = null;
       leafletRef.current = null;
     };
@@ -464,7 +467,7 @@ export function ResourceFinder({
       subdomains: tileConfig.subdomains,
       maxZoom: tileConfig.maxZoom,
     }).addTo(map);
-  }, [resolvedMapStyle]);
+  }, [isMapReady, resolvedMapStyle]);
 
   useEffect(() => {
     const L = leafletRef.current;
