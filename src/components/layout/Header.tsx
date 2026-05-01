@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/resource-finder", label: "Resource Finder" },
@@ -42,20 +44,23 @@ export function Header() {
           </span>
         </button>
 
-        <nav
-          aria-label="Primary"
-          className="hidden items-center gap-6 text-sm text-[var(--color-text-muted)] md:flex"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="border-b border-transparent pb-1 transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="hidden items-center gap-5 md:flex">
+          <nav
+            aria-label="Primary"
+            className="flex items-center gap-6 text-sm text-[var(--color-text-muted)]"
+          >
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="border-b border-transparent pb-1 transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-text-strong)]"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <ThemeToggle />
+        </div>
       </div>
 
       <div
@@ -76,6 +81,9 @@ export function Header() {
               </li>
             ))}
           </ul>
+          <div className="mt-4 border-t border-[var(--color-border-soft)] pt-3">
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>

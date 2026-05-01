@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 
 import { SiteShell } from "@/components/layout/SiteShell";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
@@ -44,9 +46,40 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const themeInitScript = `
+    (() => {
+      try {
+        const key = "${THEME_STORAGE_KEY}";
+        const saved = localStorage.getItem(key);
+        const theme = saved === "light" || saved === "dark" || saved === "system" ? saved : "system";
+        const root = document.documentElement;
+        root.setAttribute("data-theme", theme);
+
+        const existingMeta = document.head.querySelector('meta[data-theme-color="manual"]');
+        if (theme === "system") {
+          if (existingMeta) existingMeta.remove();
+          return;
+        }
+
+        const color = theme === "dark" ? "#0d0a12" : "#f5f1eb";
+        const meta = existingMeta || (() => {
+          const created = document.createElement("meta");
+          created.name = "theme-color";
+          created.setAttribute("data-theme-color", "manual");
+          document.head.appendChild(created);
+          return created;
+        })();
+        meta.content = color;
+      } catch {}
+    })();
+  `;
+
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full">
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         <SiteShell>{children}</SiteShell>
       </body>
     </html>

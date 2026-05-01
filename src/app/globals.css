@@ -76,11 +76,80 @@
     rgba(245, 241, 235, 0.2) 52%,
     rgba(245, 241, 235, 0.84) 100%
   );
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --color-surface-1: #16111f;
+  --color-surface-2: #1d1729;
+  --color-surface-3: #251d34;
+  --color-border: #3b2f54;
+  --color-border-soft: #2c2240;
+  --color-text-strong: #f5f1eb;
+  --color-text-muted: #c8bdd6;
+  --color-text-faint: #9a8fb0;
+
+  --color-page-bg-solid: #0d0a12;
+  --body-glow-1: rgb(140 107 196 / 22%);
+  --body-glow-2: rgb(229 106 166 / 13%);
+  --body-grad-start: #0d0a12;
+  --body-grad-mid: #120d1a;
+  --body-grad-end: #0d0a12;
+
+  --color-panel-gradient: linear-gradient(
+    180deg,
+    rgb(37 29 52 / 70%) 0%,
+    rgb(29 23 41 / 94%) 100%
+  );
+  --color-panel-shadow:
+    0 24px 45px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 3%);
+  --color-panel-soft-bg: rgb(22 17 31 / 84%);
+
+  --color-hero-bg: #09070e;
+  --color-hero-overlay-gradient: linear-gradient(
+    180deg,
+    rgba(13, 10, 18, 0.4) 0%,
+    rgba(9, 7, 14, 0.95) 68%
+  );
+  --color-hero-glow-primary: radial-gradient(
+    circle,
+    rgba(140, 107, 196, 0.2) 0%,
+    rgba(140, 107, 196, 0) 72%
+  );
+  --color-hero-glow-secondary: radial-gradient(
+    circle,
+    rgba(229, 106, 166, 0.1) 0%,
+    rgba(229, 106, 166, 0) 75%
+  );
+
+  --color-header-bg: rgb(13 10 18 / 86%);
+  --color-header-mobile-bg: rgb(13 10 18 / 96%);
+  --color-footer-bg: rgb(13 10 18 / 85%);
+  --color-chip-bg: rgb(22 17 31 / 72%);
+  --color-field-bg: rgb(13 10 18 / 75%);
+  --color-field-bg-strong: rgb(13 10 18 / 88%);
+  --color-soft-panel-bg: rgb(13 10 18 / 65%);
+  --color-toggle-bg: rgb(13 10 18 / 72%);
+  --color-overlay-panel: rgb(7 5 11 / 78%);
+  --color-overlay-panel-alt: rgb(7 5 11 / 80%);
+  --color-overlay-alert: rgb(7 5 11 / 88%);
+  --color-results-panel-bg: rgb(7 5 11 / 92%);
+  --color-map-overlay-soft: rgb(7 5 11 / 52%);
+  --color-map-overlay-strong: rgb(7 5 11 / 72%);
+  --color-map-fade-gradient: linear-gradient(
+    180deg,
+    rgba(7, 5, 11, 0.82) 0%,
+    rgba(7, 5, 11, 0.38) 28%,
+    rgba(7, 5, 11, 0.18) 52%,
+    rgba(7, 5, 11, 0.78) 100%
+  );
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]),
+  :root[data-theme="system"] {
     --color-surface-1: #16111f;
     --color-surface-2: #1d1729;
     --color-surface-3: #251d34;
@@ -145,6 +214,7 @@
       rgba(7, 5, 11, 0.18) 52%,
       rgba(7, 5, 11, 0.78) 100%
     );
+    color-scheme: dark;
   }
 }
 
