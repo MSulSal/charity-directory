@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
+import { useResolvedMapStyle } from "@/hooks/useResolvedMapStyle";
 import { MapLinkOptions } from "@/components/MapLinkOptions";
 import {
   geocodeLocationQuery,
@@ -11,6 +12,8 @@ import {
 } from "@/lib/geo";
 import type { GeoPoint } from "@/lib/geo";
 import { buildMapLinks } from "@/lib/mapLinks";
+import { getLeafletTileConfig } from "@/lib/mapTheme";
+import type { MapStylePreference } from "@/lib/mapTheme";
 import type {
   Category,
   CharityOrganization,
@@ -35,6 +38,11 @@ interface ResourceFinderProps {
 }
 
 const radiusOptions = [5, 10, 25, 50, 100, 250, 500];
+const mapStyleOptions: Array<{ value: MapStylePreference; label: string }> = [
+  { value: "auto", label: "Auto (local time)" },
+  { value: "day", label: "Day map" },
+  { value: "night", label: "Night map" },
+];
 
 function isVetted(charity: CharityOrganization) {
   return charity.verificationBadges.some(
@@ -102,9 +110,15 @@ export function ResourceFinder({
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [mobileResultsView, setMobileResultsView] = useState<"map" | "list">("map");
+  const {
+    preference: mapStylePreference,
+    resolvedStyle: resolvedMapStyle,
+    setPreference: setMapStylePreference,
+  } = useResolvedMapStyle();
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
+  const tileLayerRef = useRef<import("leaflet").TileLayer | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const geocodeCacheRef = useRef<Map<string, GeoPoint | null>>(new Map());
@@ -405,11 +419,6 @@ export function ResourceFinder({
           attributionControl: true,
         });
 
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; OpenStreetMap contributors",
-          maxZoom: 19,
-        }).addTo(map);
-
         map.setView([39.5, -98.35], 4);
 
         mapRef.current = map;
@@ -423,6 +432,10 @@ export function ResourceFinder({
 
     return () => {
       cancelled = true;
+      if (tileLayerRef.current) {
+        tileLayerRef.current.remove();
+        tileLayerRef.current = null;
+      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -431,6 +444,27 @@ export function ResourceFinder({
       leafletRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+
+    if (!L || !map) {
+      return;
+    }
+
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+      tileLayerRef.current = null;
+    }
+
+    const tileConfig = getLeafletTileConfig(resolvedMapStyle);
+    tileLayerRef.current = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      subdomains: tileConfig.subdomains,
+      maxZoom: tileConfig.maxZoom,
+    }).addTo(map);
+  }, [resolvedMapStyle]);
 
   useEffect(() => {
     const L = leafletRef.current;
@@ -922,6 +956,23 @@ export function ResourceFinder({
                         {populations.map((item) => (
                           <option key={item} value={item}>
                             {item}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="text-xs text-[var(--color-text-muted)]">
+                      <span className="mb-2 block uppercase tracking-wide">Map style</span>
+                      <select
+                        value={mapStylePreference}
+                        onChange={(event) =>
+                          setMapStylePreference(event.target.value as MapStylePreference)
+                        }
+                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
+                      >
+                        {mapStyleOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
                           </option>
                         ))}
                       </select>

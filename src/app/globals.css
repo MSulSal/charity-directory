@@ -139,10 +139,10 @@
   --color-map-overlay-strong: rgb(7 5 11 / 72%);
   --color-map-fade-gradient: linear-gradient(
     180deg,
-    rgba(7, 5, 11, 0.82) 0%,
-    rgba(7, 5, 11, 0.38) 28%,
-    rgba(7, 5, 11, 0.18) 52%,
-    rgba(7, 5, 11, 0.78) 100%
+    rgba(7, 5, 11, 0.58) 0%,
+    rgba(7, 5, 11, 0.22) 28%,
+    rgba(7, 5, 11, 0.08) 52%,
+    rgba(7, 5, 11, 0.52) 100%
   );
   color-scheme: dark;
 }
@@ -209,10 +209,10 @@
     --color-map-overlay-strong: rgb(7 5 11 / 72%);
     --color-map-fade-gradient: linear-gradient(
       180deg,
-      rgba(7, 5, 11, 0.82) 0%,
-      rgba(7, 5, 11, 0.38) 28%,
-      rgba(7, 5, 11, 0.18) 52%,
-      rgba(7, 5, 11, 0.78) 100%
+      rgba(7, 5, 11, 0.58) 0%,
+      rgba(7, 5, 11, 0.22) 28%,
+      rgba(7, 5, 11, 0.08) 52%,
+      rgba(7, 5, 11, 0.52) 100%
     );
     color-scheme: dark;
   }

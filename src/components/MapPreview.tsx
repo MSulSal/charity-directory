@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useResolvedMapStyle } from "@/hooks/useResolvedMapStyle";
 import { useIsIOSMobile } from "@/hooks/useIsIOSMobile";
 import { formatAddress } from "@/lib/format";
 import { buildMapLinks } from "@/lib/mapLinks";
+import { getLeafletTileConfig } from "@/lib/mapTheme";
 import type { ContactInfo } from "@/types/charity";
 
 interface MapPreviewProps {
@@ -16,10 +18,12 @@ interface MapPreviewProps {
 export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
+  const tileLayerRef = useRef<import("leaflet").TileLayer | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const isIOSMobile = useIsIOSMobile();
+  const { resolvedStyle: resolvedMapStyle } = useResolvedMapStyle();
 
   const address = formatAddress(contact);
   const mapLinks = useMemo(
@@ -59,11 +63,6 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
           attributionControl: true,
         });
 
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; OpenStreetMap contributors",
-          maxZoom: 19,
-        }).addTo(map);
-
         map.setView([39.5, -98.35], 4);
 
         mapRef.current = map;
@@ -77,6 +76,10 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
 
     return () => {
       cancelled = true;
+      if (tileLayerRef.current) {
+        tileLayerRef.current.remove();
+        tileLayerRef.current = null;
+      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -85,6 +88,27 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
       leafletRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+
+    if (!L || !map) {
+      return;
+    }
+
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+      tileLayerRef.current = null;
+    }
+
+    const tileConfig = getLeafletTileConfig(resolvedMapStyle);
+    tileLayerRef.current = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      subdomains: tileConfig.subdomains,
+      maxZoom: tileConfig.maxZoom,
+    }).addTo(map);
+  }, [resolvedMapStyle]);
 
   useEffect(() => {
     const map = mapRef.current;
