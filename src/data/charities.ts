@@ -717,12 +717,6 @@ export const charities: CharityOrganization[] = [
       "The Food Depository lists multiple food and product donation pathways, including company food donations and community drives.",
     verificationBadges: [
       {
-        source: "User-provided charity list",
-        label: "Marked as a 100-score organization in provided PDF list",
-        status: "self-reported",
-        updatedAt: "2026-05-09",
-      },
-      {
         source: "Greater Chicago Food Depository Contact",
         label: "Address, phone, 501(c)(3) status, and EIN are listed",
         status: "listed",
@@ -742,7 +736,7 @@ export const charities: CharityOrganization[] = [
       "Official site states the Food Depository is a 501(c)(3) charitable organization.",
     lastVerified: "2026-05-09",
     notes:
-      "Added from user-provided 100-score list. Coordinates support resource-finder map placement and map links use full address.",
+      "Coordinates support resource-finder map placement and map links use full address.",
   },
   {
     id: "charity-013",
@@ -787,12 +781,6 @@ export const charities: CharityOrganization[] = [
     waysToHelp: ["Donate", "Volunteer", "Events", "Remote"],
     verificationBadges: [
       {
-        source: "User-provided charity list",
-        label: "Marked as a 100-score organization in provided PDF list",
-        status: "self-reported",
-        updatedAt: "2026-05-09",
-      },
-      {
         source: "CFW Contact Page",
         label: "Chicago office address and contact details are listed",
         status: "listed",
@@ -819,7 +807,7 @@ export const charities: CharityOrganization[] = [
       "CFW donation pages describe the foundation as a designated 501(c)(3) public foundation.",
     lastVerified: "2026-05-09",
     notes:
-      "Added from user-provided 100-score list; field values sourced from official cfw.org pages.",
+      "Field values sourced from official cfw.org pages.",
   },
   {
     id: "charity-014",
@@ -858,12 +846,6 @@ export const charities: CharityOrganization[] = [
     waysToHelp: ["Donate", "Volunteer", "Events", "Remote"],
     verificationBadges: [
       {
-        source: "User-provided charity list",
-        label: "Marked as a 100-score organization in provided PDF list",
-        status: "self-reported",
-        updatedAt: "2026-05-09",
-      },
-      {
         source: "Women for Women International Contact",
         label: "Global HQ contact details and 501(c)(3) EIN are listed",
         status: "listed",
@@ -883,6 +865,6 @@ export const charities: CharityOrganization[] = [
       "Official site states Women for Women International is a nonprofit 501(c)(3) organization.",
     lastVerified: "2026-05-09",
     notes:
-      "Added from user-provided 100-score list; map pin uses HQ address block coordinates and profile links to official pages.",
+      "Map pin uses HQ address block coordinates and profile links to official pages.",
   },
 ];
