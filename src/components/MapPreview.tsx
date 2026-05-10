@@ -130,8 +130,13 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
     }
 
     const charityLatLng = L.latLng(coordinates.latitude, coordinates.longitude);
-
-    map.setView(charityLatLng, 12);
+    const focusCircle = L.circle(charityLatLng, {
+      radius: 350,
+      color: "#8C6BC4",
+      weight: 1,
+      fillColor: "#8C6BC4",
+      fillOpacity: 0.12,
+    }).addTo(markerLayer);
 
     L.circleMarker(charityLatLng, {
       radius: 7,
@@ -142,7 +147,23 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
     })
       .addTo(markerLayer)
       .bindTooltip(charityName);
+
+    map.fitBounds(focusCircle.getBounds(), { padding: [18, 18], maxZoom: 16 });
   }, [charityName, coordinates]);
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      return;
+    }
+
+    const handle = window.setTimeout(() => {
+      mapRef.current?.invalidateSize();
+    }, 80);
+
+    return () => {
+      window.clearTimeout(handle);
+    };
+  }, [coordinates, resolvedMapStyle]);
 
   return (
     <section className="space-y-3" aria-label="Map preview">

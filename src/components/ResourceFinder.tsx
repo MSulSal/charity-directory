@@ -192,6 +192,7 @@ export function ResourceFinder({
       ),
     [withDistanceFromStart],
   );
+  const hasActiveLocationText = activeLocation.trim().length > 0;
 
   const filtered = useMemo(() => {
     if (!hasSearched) {
@@ -199,11 +200,7 @@ export function ResourceFinder({
     }
 
     const normalizedQuery = activeQuery.trim().toLowerCase();
-    const hasLocationText = activeLocation.trim().length > 0;
-
-    if (!hasLocationText) {
-      return [];
-    }
+    const hasLocationText = hasActiveLocationText;
 
     const results = withDistance.filter(({ charity, distanceMiles }) => {
       if (normalizedQuery) {
@@ -274,7 +271,6 @@ export function ResourceFinder({
       return left.charity.name.localeCompare(right.charity.name);
     });
   }, [
-    activeLocation,
     activePopulationServed,
     activeQuery,
     activeRadiusMiles,
@@ -282,10 +278,22 @@ export function ResourceFinder({
     activeSubcategory,
     activeVerifiedOnly,
     activeWayToHelp,
+    hasActiveLocationText,
     hasSearched,
     locationCenter,
     withDistance,
   ]);
+
+  const allMappableCharities = useMemo(
+    () =>
+      charities.filter((charity) => {
+        return (
+          charity.contact.latitude !== undefined &&
+          charity.contact.longitude !== undefined
+        );
+      }),
+    [charities],
+  );
 
   const mappableResults = useMemo(
     () =>
@@ -293,10 +301,10 @@ export function ResourceFinder({
         return (
           charity.contact.latitude !== undefined &&
           charity.contact.longitude !== undefined &&
-          distanceMiles !== null
+          (!hasActiveLocationText || distanceMiles !== null)
         );
       }),
-    [filtered],
+    [filtered, hasActiveLocationText],
   );
 
   useEffect(() => {
@@ -480,31 +488,71 @@ export function ResourceFinder({
 
     markerLayer.clearLayers();
 
-    if (!hasSearched || !locationCenter) {
+    if (!hasSearched) {
+      if (allMappableCharities.length === 0) {
+        map.setView([39.5, -98.35], 4);
+        return;
+      }
+
+      const bounds = L.latLngBounds([]);
+      allMappableCharities.slice(0, 120).forEach((charity) => {
+        const markerLatLng = L.latLng(
+          charity.contact.latitude as number,
+          charity.contact.longitude as number,
+        );
+        bounds.extend(markerLatLng);
+
+        const categoryLabel = categoryMap.get(charity.categorySlug) ?? "Uncategorized";
+
+        L.circleMarker(markerLatLng, {
+          radius: 5,
+          color: "#E7E0D8",
+          weight: 1,
+          fillColor: "#8C6BC4",
+          fillOpacity: 0.9,
+        })
+          .addTo(markerLayer)
+          .bindTooltip(`${charity.name} • ${categoryLabel}`);
+      });
+
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [24, 24], maxZoom: 11 });
+      } else {
+        map.setView([39.5, -98.35], 4);
+      }
+
+      return;
+    }
+
+    if (hasActiveLocationText && !locationCenter) {
       map.setView([39.5, -98.35], 4);
       return;
     }
 
-    const centerLatLng = L.latLng(locationCenter.latitude, locationCenter.longitude);
-    const radiusCircle = L.circle(centerLatLng, {
-      radius: activeRadiusMiles * 1609.344,
-      color: "#8C6BC4",
-      weight: 1,
-      fillColor: "#8C6BC4",
-      fillOpacity: 0.12,
-    }).addTo(markerLayer);
+    let bounds = L.latLngBounds([]);
 
-    const bounds = radiusCircle.getBounds();
+    if (locationCenter) {
+      const centerLatLng = L.latLng(locationCenter.latitude, locationCenter.longitude);
+      const radiusCircle = L.circle(centerLatLng, {
+        radius: activeRadiusMiles * 1609.344,
+        color: "#8C6BC4",
+        weight: 1,
+        fillColor: "#8C6BC4",
+        fillOpacity: 0.12,
+      }).addTo(markerLayer);
 
-    L.circleMarker(centerLatLng, {
-      radius: 7,
-      color: "#0D0A12",
-      weight: 1,
-      fillColor: "#E8BE4B",
-      fillOpacity: 1,
-    })
-      .addTo(markerLayer)
-      .bindTooltip(`Search center: ${locationCenter.label}`);
+      bounds = radiusCircle.getBounds();
+
+      L.circleMarker(centerLatLng, {
+        radius: 7,
+        color: "#0D0A12",
+        weight: 1,
+        fillColor: "#E8BE4B",
+        fillOpacity: 1,
+      })
+        .addTo(markerLayer)
+        .bindTooltip(`Search center: ${locationCenter.label}`);
+    }
 
     const startLatLng = hasActiveStartPoint && startPointCenter
       ? L.latLng(startPointCenter.latitude, startPointCenter.longitude)
@@ -520,6 +568,7 @@ export function ResourceFinder({
       })
         .addTo(markerLayer)
         .bindTooltip(`Starting point: ${startPointCenter?.label ?? "Selected start"}`);
+      bounds.extend(startLatLng);
     }
 
     mappableResults.slice(0, 80).forEach(({ charity, distanceMiles }) => {
@@ -538,9 +587,11 @@ export function ResourceFinder({
         ? startDistanceMiles === null
           ? "Distance from start unavailable"
           : `${startDistanceMiles.toFixed(1)} miles from start`
-        : distanceMiles === null
-          ? "Distance unavailable"
-          : `${distanceMiles.toFixed(1)} miles away`;
+        : hasActiveLocationText
+          ? distanceMiles === null
+            ? "Distance unavailable"
+            : `${distanceMiles.toFixed(1)} miles away`
+          : "Location radius not set";
 
       const categoryLabel = categoryMap.get(charity.categorySlug) ?? "Uncategorized";
 
@@ -564,11 +615,20 @@ export function ResourceFinder({
       }
     });
 
-    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, {
+        padding: [24, 24],
+        maxZoom: locationCenter ? 14 : 11,
+      });
+    } else {
+      map.setView([39.5, -98.35], 4);
+    }
   }, [
+    allMappableCharities,
     activeRadiusMiles,
     activeShowRoutes,
     categoryMap,
+    hasActiveLocationText,
     hasActiveStartPoint,
     hasSearched,
     locationCenter,
@@ -580,15 +640,10 @@ export function ResourceFinder({
   function applySearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!location.trim()) {
-      setHasSearched(false);
-      setGeocodedCenter(null);
-      setIsGeocoding(false);
-      setSearchError("Enter a city, state, or ZIP to search nearby resources.");
-      return;
-    }
-
-    const localDatasetCenter = resolveLocationQuery(location.trim(), charities);
+    const trimmedLocation = location.trim();
+    const localDatasetCenter = trimmedLocation
+      ? resolveLocationQuery(trimmedLocation, charities)
+      : null;
     const trimmedStartPoint = startPoint.trim();
     const localDatasetStartCenter = trimmedStartPoint
       ? resolveLocationQuery(trimmedStartPoint, charities)
@@ -596,11 +651,11 @@ export function ResourceFinder({
 
     setSearchError(null);
     setGeocodedCenter(null);
-    setIsGeocoding(!localDatasetCenter);
+    setIsGeocoding(Boolean(trimmedLocation) && !localDatasetCenter);
     setGeocodedStartCenter(null);
     setIsGeocodingStart(Boolean(trimmedStartPoint) && !localDatasetStartCenter);
     setActiveQuery(query.trim());
-    setActiveLocation(location.trim());
+    setActiveLocation(trimmedLocation);
     setActiveStartPoint(trimmedStartPoint);
     setActiveRadiusMiles(radiusMiles);
     setActiveSubcategory(subcategory);
@@ -642,7 +697,7 @@ export function ResourceFinder({
     setMobileResultsView("map");
   }
 
-  const showResultsPanel = hasSearched && activeLocation.trim().length > 0;
+  const showResultsPanel = hasSearched;
   const isMobileListView = mobileResultsView === "list";
   const showMapCanvas = !isMobileListView;
 
@@ -664,7 +719,7 @@ export function ResourceFinder({
     if (!hasSearched) {
       return (
         <p className="text-sm text-[var(--color-text-muted)]">
-          Enter a location and press Find Resources to load matching organizations.
+          All mapped organizations are visible as pins. Press Find Resources to open a filtered list.
         </p>
       );
     }
@@ -676,7 +731,7 @@ export function ResourceFinder({
     if (filtered.length === 0) {
       return (
         <p className="text-sm text-[var(--color-text-muted)]">
-          No resources found with the current location, radius, and filter settings.
+          No resources found with the current filters.
         </p>
       );
     }
@@ -852,11 +907,11 @@ export function ResourceFinder({
                   </label>
 
                   <label className="text-xs text-[var(--color-text-muted)]">
-                    <span className="mb-2 block uppercase tracking-wide">Keyword</span>
+                    <span className="mb-2 block uppercase tracking-wide">Keyword or name</span>
                     <input
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
-                      placeholder="food bank, legal aid, youth programs"
+                      placeholder="organization name, food bank, legal aid"
                       className="h-11 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-3 text-sm text-[var(--color-text-strong)] outline-none placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-soft-amethyst)]"
                     />
                   </label>
@@ -875,11 +930,13 @@ export function ResourceFinder({
 
                 {hasSearched ? (
                   <p className="mt-3 text-xs text-[var(--color-text-faint)]">
-                    {locationCenter
-                      ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
-                      : isGeocoding
-                        ? "Looking up location..."
-                        : "Location not recognized. Try a nearby city, state, or ZIP."}
+                    {hasActiveLocationText
+                      ? locationCenter
+                        ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
+                        : isGeocoding
+                          ? "Looking up location..."
+                          : "Location not recognized. Try a nearby city, state, or ZIP."
+                      : "Name/category search active across all mapped locations."}
                   </p>
                 ) : null}
                 {hasSearched && hasActiveStartPoint ? (
@@ -1030,7 +1087,11 @@ export function ResourceFinder({
               </div>
             </div>
 
-            {showMapCanvas && hasSearched && !locationCenter && !isGeocoding ? (
+            {showMapCanvas &&
+            hasSearched &&
+            hasActiveLocationText &&
+            !locationCenter &&
+            !isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-md border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   No location match found. Try a nearby city, state, or ZIP.
@@ -1038,7 +1099,11 @@ export function ResourceFinder({
               </div>
             ) : null}
 
-            {showMapCanvas && hasSearched && !locationCenter && isGeocoding ? (
+            {showMapCanvas &&
+            hasSearched &&
+            hasActiveLocationText &&
+            !locationCenter &&
+            isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-md border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
                   Looking up location...
