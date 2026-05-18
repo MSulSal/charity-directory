@@ -867,4 +867,216 @@ export const charities: CharityOrganization[] = [
     notes:
       "Map pin uses HQ address block coordinates and profile links to official pages.",
   },
+  {
+    id: "charity-015",
+    slug: "paws-chicago",
+    name: "PAWS Chicago",
+    mission:
+      "Build a no-kill community through pet adoption, animal rescue, veterinary support, and lifesaving services for homeless cats and dogs.",
+    sampleData: false,
+    categorySlug: "animals-environment",
+    subcategories: [
+      "Animal shelters & rescue",
+      "Pet adoption",
+      "Veterinary assistance",
+    ],
+    populationServed: [
+      "Homeless cats and dogs",
+      "Adopters",
+      "Pet owners seeking support services",
+    ],
+    serviceScale: "Local",
+    serviceArea: "Chicago metropolitan area",
+    contact: {
+      phone: "+1 (773) 935-7297",
+      email: "development@pawschicago.org",
+      addressLine1: "1997 N Clybourn Ave",
+      city: "Chicago",
+      state: "IL",
+      latitude: 41.917595,
+      longitude: -87.6586728,
+      postalCode: "60614",
+      country: "USA",
+    },
+    links: {
+      website: "https://www.pawschicago.org/",
+      donate: "https://www.pawschicago.org/how-to-help/donate/",
+      donationFaq:
+        "https://www.pawschicago.org/how-to-help/donate/other-ways-to-give/donation-faqs/showpage",
+      volunteer: "https://www.pawschicago.org/how-to-help/volunteer/",
+      form990:
+        "https://www.pawschicago.org/fileadmin/media/documents/2016_PAWS_Chicago_Form_990_Public__1_.pdf",
+    },
+    social: {},
+    waysToHelp: ["Donate", "Volunteer", "Goods", "Events"],
+    goodsDonationInfo:
+      "PAWS Chicago lists supply and in-kind donation pathways for pet food, care items, and other shelter needs.",
+    verificationBadges: [
+      {
+        source: "PAWS Chicago Donation FAQs",
+        label: "Donation FAQ lists Tax ID (36-4219778) and donation details",
+        status: "listed",
+        url: "https://www.pawschicago.org/how-to-help/donate/other-ways-to-give/donation-faqs/showpage",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "PAWS Chicago Contact",
+        label: "Address and phone details are listed",
+        status: "listed",
+        url: "https://www.pawschicago.org/contact-us/",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "PAWS Chicago Form 990",
+        label: "Organization Form 990 is published on the official domain",
+        status: "listed",
+        url: "https://www.pawschicago.org/fileadmin/media/documents/2016_PAWS_Chicago_Form_990_Public__1_.pdf",
+        updatedAt: "2026-05-18",
+      },
+    ],
+    ein: "36-4219778",
+    status501c3:
+      "PAWS Chicago donation materials list tax-deductible giving under federal Tax ID 36-4219778.",
+    lastVerified: "2026-05-18",
+    notes:
+      "Map pin uses the Chicago office address coordinates for profile and resource-finder views.",
+  },
+  {
+    id: "charity-016",
+    slug: "working-bikes",
+    name: "Working Bikes",
+    mission:
+      "Collect and refurbish donated bicycles to provide reliable transportation access for local communities and international partners.",
+    sampleData: false,
+    categorySlug: "basic-needs-human-services",
+    subcategories: ["Transportation assistance", "Poverty relief"],
+    populationServed: [
+      "People needing affordable transportation",
+      "Community-based organizations",
+      "International bicycle access programs",
+    ],
+    serviceScale: "International",
+    serviceArea:
+      "Chicago local distribution and global bicycle shipments through partner organizations",
+    contact: {
+      phone: "+1 (773) 847-5440",
+      email: "bikeshop@workingbikes.org",
+      addressLine1: "2434 S Western Ave",
+      city: "Chicago",
+      state: "IL",
+      latitude: 41.8472859,
+      longitude: -87.6859674,
+      postalCode: "60608",
+      country: "USA",
+    },
+    links: {
+      website: "https://workingbikes.org/",
+      donate: "https://workingbikes.org/monetarydonations/",
+      donationFaq: "https://workingbikes.org/get-involved/wb-volunteer-faq/",
+      volunteer: "https://workingbikes.org/volunteer-portal/",
+    },
+    social: {},
+    waysToHelp: ["Donate", "Volunteer", "Goods", "Events"],
+    goodsDonationInfo:
+      "Working Bikes accepts used bicycle donations and related gear for refurbishment and redistribution.",
+    verificationBadges: [
+      {
+        source: "Working Bikes About",
+        label: "Organization overview describes nonprofit 501(c)(3) status",
+        status: "listed",
+        url: "https://workingbikes.org/about/",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "Working Bikes Contact",
+        label: "Chicago location, phone, and email are listed",
+        status: "listed",
+        url: "https://workingbikes.org/contact-us/",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "Working Bikes Donation Form",
+        label: "Federal ID number 54-2138339 is listed for donations",
+        status: "listed",
+        url: "https://workingbikes.org/wp-content/uploads/2020/11/Fillable-Monetary-Donation-Form.pdf",
+        updatedAt: "2026-05-18",
+      },
+    ],
+    ein: "54-2138339",
+    status501c3:
+      "Working Bikes describes itself as a 501(c)(3) nonprofit and publishes federal ID 54-2138339 for donations.",
+    lastVerified: "2026-05-18",
+    notes:
+      "Map pin uses the Working Bikes Cooperative address for local resource-finder and profile map views.",
+  },
+  {
+    id: "charity-017",
+    slug: "aspca",
+    name: "American Society for the Prevention of Cruelty to Animals (ASPCA)",
+    mission:
+      "Prevent cruelty to animals through rescue, adoption support, animal protection programs, and advocacy across the United States.",
+    sampleData: false,
+    categorySlug: "animals-environment",
+    subcategories: [
+      "Animal shelters & rescue",
+      "Veterinary assistance",
+      "Wildlife protection",
+    ],
+    populationServed: [
+      "Companion animals",
+      "Pet owners",
+      "Animal welfare organizations",
+    ],
+    serviceScale: "National",
+    serviceArea: "United States",
+    contact: {
+      phone: "+1 (212) 876-7700",
+      email: "info@aspca.org",
+      addressLine1: "424 E 92nd St",
+      city: "New York",
+      state: "NY",
+      latitude: 40.7800543,
+      longitude: -73.9456852,
+      postalCode: "10128",
+      country: "USA",
+    },
+    links: {
+      website: "https://www.aspca.org/",
+      donate: "https://www.aspca.org/ways-to-give",
+      donationFaq: "https://www.aspca.org/about-us/faq",
+      volunteer: "https://www.aspca.org/take-action/volunteer/safety-net-volunteer",
+      form990: "https://www.aspca.org/sites/default/files/aspca-form-990_fy2024.pdf",
+    },
+    social: {},
+    waysToHelp: ["Donate", "Volunteer", "Events", "Remote"],
+    verificationBadges: [
+      {
+        source: "ASPCA FAQ",
+        label: "ASPCA FAQ lists EIN 13-1623829 and 501(c)(3) status",
+        status: "listed",
+        url: "https://www.aspca.org/about-us/faq",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "ASPCA Contact",
+        label: "Headquarters address and contact details are listed",
+        status: "listed",
+        url: "https://www.aspca.org/about-us/contact-us",
+        updatedAt: "2026-05-18",
+      },
+      {
+        source: "ASPCA Form 990",
+        label: "Current Form 990 PDF is published on official domain",
+        status: "listed",
+        url: "https://www.aspca.org/sites/default/files/aspca-form-990_fy2024.pdf",
+        updatedAt: "2026-05-18",
+      },
+    ],
+    ein: "13-1623829",
+    status501c3:
+      "ASPCA FAQ states it is a 501(c)(3) organization with EIN 13-1623829.",
+    lastVerified: "2026-05-18",
+    notes:
+      "Profile map and resource-finder marker use the listed New York headquarters address coordinates.",
+  },
 ];
