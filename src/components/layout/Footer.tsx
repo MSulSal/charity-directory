@@ -5,7 +5,7 @@ const footerLinks = [
   { href: "/resource-finder", label: "Resource Finder" },
   { href: "/categories", label: "Categories" },
   { href: "/for-nonprofits", label: "For Nonprofits" },
-  { href: "/submit-a-charity", label: "Submit a Charity" },
+  { href: "/submit-a-charity", label: "Apply / Recommend" },
   { href: "/resource-finder?verified=1", label: "Trust & Verification" },
   { href: "/contact", label: "Contact" },
 ];

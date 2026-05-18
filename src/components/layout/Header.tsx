@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/resource-finder", label: "Resource Finder" },
   { href: "/categories", label: "Categories" },
+  { href: "/submit-a-charity", label: "Apply / Recommend" },
   { href: "/resource-finder?verified=1", label: "Trust & Verification" },
 ];
 

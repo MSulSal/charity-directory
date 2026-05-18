@@ -6,6 +6,7 @@ const actions = [
   { label: "Get Help", href: "/charities?way=Get+Help" },
   { label: "Donate Goods", href: "/charities?way=Goods" },
   { label: "Find Local Charities", href: "/resource-finder?radius=25" },
+  { label: "Apply / Recommend", href: "/submit-a-charity" },
 ];
 
 export function AudienceActionChips() {

@@ -53,7 +53,7 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
   - Hero copy, trust messaging, and search fields for "Charity, cause, or need" + location
   - Main search routes to `/charities` for full charity result cards
   - Section flow: Hero -> Resource Finder -> Category Browser
-  - Quick action chips: Donate, Volunteer, Get Help, Donate Goods, Find Local Charities
+  - Quick action chips: Donate, Volunteer, Get Help, Donate Goods, Find Local Charities, Apply / Recommend
 - Resource Finder (map + radius search):
   - `/resource-finder`
   - Enter location and radius to find nearby charities
@@ -76,6 +76,11 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
   - Verification/watchdog badges as structured fields
   - EIN, 501(c)(3) status field, Form 990 field
   - Social links, Leaflet location map, and related charities
+- Apply / Recommend intake:
+  - `/submit-a-charity`
+  - Form supports both recommendation submissions and nonprofit apply/claim requests
+  - Captures organization details, category, location, notes, and optional evidence links
+  - Saves submissions locally in browser storage for this build and provides an email draft handoff option
 - Reusable component architecture:
   - `Hero`, `SearchBar`, `AudienceActionChips`
   - `ResourceFinder`
@@ -107,7 +112,7 @@ Also includes placeholder utility pages linked in the footer:
 
 - `/about`
 - `/for-nonprofits`
-- `/submit-a-charity`
+- `/submit-a-charity` (active apply/recommend form)
 - `/contact`
 
 ## Data Notes (Important)
