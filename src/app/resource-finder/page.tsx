@@ -11,7 +11,7 @@ interface ResourceFinderPageProps {
 export const metadata: Metadata = {
   title: "Resource Finder",
   description:
-    "Find nearby charities and local resources by location radius, then narrow by subcategory, ways to help, and trust fields.",
+    "Find published charity profiles within a selected radius of a covered city or ZIP, then narrow by cause and ways to help.",
 };
 
 function firstValue(value: string | string[] | undefined) {
@@ -70,7 +70,7 @@ export default async function ResourceFinderPage({
       charities={charities}
       categories={categories}
       title="Resource Finder"
-      description="Find charities within a selected radius of an entered location. This is especially useful for food banks and other local support services."
+      description="Find published organization profiles within a selected radius of a covered city or ZIP. Confirm current services and eligibility directly with each organization."
       initialQuery={firstValue(resolved.q)}
       initialLocation={firstValue(resolved.location)}
       initialRadiusMiles={parseRadius(firstValue(resolved.radius))}

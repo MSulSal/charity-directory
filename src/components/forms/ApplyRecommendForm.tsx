@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 interface ApplyRecommendFormProps {
   categoryOptions: string[];
+  contactEmail: string;
 }
 
 type SubmissionType = "recommend" | "apply";
@@ -21,13 +22,6 @@ interface SubmissionFormState {
   evidenceLinks: string;
   consent: boolean;
 }
-
-interface StoredSubmission extends SubmissionFormState {
-  submissionId: string;
-  submittedAt: string;
-}
-
-const STORAGE_KEY = "charity-directory-submissions-v1";
 
 const relationshipOptions = [
   "Donor",
@@ -52,44 +46,39 @@ const defaultState: SubmissionFormState = {
   consent: false,
 };
 
-function buildSubmissionId() {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  return `CD-${timestamp}`;
+function buildEmailDraft(
+  submission: SubmissionFormState,
+  contactEmail: string,
+) {
+  const subjectPrefix =
+    submission.submissionType === "apply"
+      ? "Apply to Claim or Update Listing"
+      : "Recommended Charity Submission";
+  const subject = `${subjectPrefix}: ${submission.organizationName}`;
+  const body = [
+    `Type: ${submission.submissionType}`,
+    `Organization: ${submission.organizationName}`,
+    `Website: ${submission.organizationWebsite || "Not provided"}`,
+    `Category: ${submission.category || "Not provided"}`,
+    `Location: ${submission.location || "Not provided"}`,
+    `Contact Name: ${submission.contactName || "Not provided"}`,
+    `Contact Email: ${submission.contactEmail || "Not provided"}`,
+    `Relationship: ${submission.relationship || "Not provided"}`,
+    `Details: ${submission.detailNotes}`,
+    `Evidence Links: ${submission.evidenceLinks || "Not provided"}`,
+  ].join("\n");
+
+  return `mailto:${encodeURIComponent(contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-export function ApplyRecommendForm({ categoryOptions }: ApplyRecommendFormProps) {
+export function ApplyRecommendForm({
+  categoryOptions,
+  contactEmail,
+}: ApplyRecommendFormProps) {
   const [formState, setFormState] = useState<SubmissionFormState>(defaultState);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [savedSubmission, setSavedSubmission] = useState<StoredSubmission | null>(null);
-
-  const emailDraftLink = useMemo(() => {
-    if (!savedSubmission) {
-      return null;
-    }
-
-    const subjectPrefix =
-      savedSubmission.submissionType === "apply"
-        ? "Apply to Claim or Update Listing"
-        : "Recommended Charity Submission";
-    const subject = `${subjectPrefix}: ${savedSubmission.organizationName}`;
-    const body = [
-      `Submission ID: ${savedSubmission.submissionId}`,
-      `Submitted At: ${savedSubmission.submittedAt}`,
-      `Type: ${savedSubmission.submissionType}`,
-      `Organization: ${savedSubmission.organizationName}`,
-      `Website: ${savedSubmission.organizationWebsite || "Not provided"}`,
-      `Category: ${savedSubmission.category || "Not provided"}`,
-      `Location: ${savedSubmission.location || "Not provided"}`,
-      `Contact Name: ${savedSubmission.contactName || "Not provided"}`,
-      `Contact Email: ${savedSubmission.contactEmail || "Not provided"}`,
-      `Relationship: ${savedSubmission.relationship || "Not provided"}`,
-      `Details: ${savedSubmission.detailNotes}`,
-      `Evidence Links: ${savedSubmission.evidenceLinks || "Not provided"}`,
-    ].join("\n");
-
-    return `mailto:contact@charitydirectory.org?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [savedSubmission]);
+  const [emailDraftLink, setEmailDraftLink] = useState<string | null>(null);
 
   function updateField<Key extends keyof SubmissionFormState>(
     key: Key,
@@ -108,26 +97,10 @@ export function ApplyRecommendForm({ categoryOptions }: ApplyRecommendFormProps)
       return;
     }
 
-    const storedRecord: StoredSubmission = {
-      ...formState,
-      submissionId: buildSubmissionId(),
-      submittedAt: new Date().toISOString(),
-    };
-
-    try {
-      const existing = localStorage.getItem(STORAGE_KEY);
-      const parsed: StoredSubmission[] = existing ? (JSON.parse(existing) as StoredSubmission[]) : [];
-      const updated = [storedRecord, ...parsed].slice(0, 100);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      setSavedSubmission(storedRecord);
-      setSuccessMessage(`Submission saved with ID ${storedRecord.submissionId}.`);
-      setFormState((current) => ({
-        ...defaultState,
-        submissionType: current.submissionType,
-      }));
-    } catch {
-      setErrorMessage("Unable to save your submission on this device. Please copy details and try again.");
-    }
+    const draft = buildEmailDraft(formState, contactEmail);
+    setEmailDraftLink(draft);
+    setSuccessMessage("Your email app should open with the details filled in. Send the email to complete your recommendation or claim request.");
+    window.location.assign(draft);
   }
 
   return (
@@ -140,7 +113,7 @@ export function ApplyRecommendForm({ categoryOptions }: ApplyRecommendFormProps)
           Use this form to recommend a new charity listing or apply to claim and update an existing profile.
         </p>
         <p className="text-xs leading-6 text-[var(--color-text-faint)]">
-          Submissions are currently stored in your browser for this build. You can also send the generated email draft after submitting.
+          This form opens a pre-filled email to our directory team. Your details are not stored by this website; send the email to complete your request.
         </p>
       </div>
 
@@ -297,14 +270,14 @@ export function ApplyRecommendForm({ categoryOptions }: ApplyRecommendFormProps)
             type="submit"
             className="h-11 border border-[var(--color-saffron)] bg-[var(--color-saffron)] px-5 text-sm font-semibold text-[var(--color-obsidian)] transition hover:brightness-95"
           >
-            Submit
+            Open Email Draft
           </button>
           {emailDraftLink ? (
             <a
               href={emailDraftLink}
               className="h-11 border border-[var(--color-border)] px-5 text-sm font-medium leading-[2.75rem] text-[var(--color-text-strong)] transition hover:border-[var(--color-soft-amethyst)] hover:text-[var(--color-soft-amethyst)]"
             >
-              Open Email Draft
+              Reopen Email Draft
             </a>
           ) : null}
         </div>

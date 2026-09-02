@@ -24,7 +24,7 @@ export default function ForNonprofitsPage() {
           Start an Intake Submission
         </h2>
         <p className="text-sm leading-7 text-[var(--color-text-muted)]">
-          Share your organization details, service area, and reference links so we can review and publish updates in the directory.
+          Share your organization details, service area, and reference links in a pre-filled email so we can review proposed updates before publishing them.
         </p>
         <Link
           href="/submit-a-charity"

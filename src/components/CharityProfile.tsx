@@ -72,7 +72,7 @@ export function CharityProfile({
               Organization details
             </h2>
             <p className="text-sm text-[var(--color-text-muted)]">
-              This profile uses sample data fields to model future nonprofit records. Values below are placeholders for real integrations.
+              Details are organized from the organization and linked public sources. Review the source links before taking action.
             </p>
           </div>
 

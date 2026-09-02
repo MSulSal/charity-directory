@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 
 export default function SubmitCharityPage() {
   const categoryOptions = categories.map((category) => category.name);
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
 
   return (
     <section className="mx-auto w-full max-w-5xl space-y-6 px-6 py-12 sm:px-8 lg:px-10 lg:py-16">
@@ -27,7 +28,13 @@ export default function SubmitCharityPage() {
         </p>
       </header>
 
-      <ApplyRecommendForm categoryOptions={categoryOptions} />
+      {contactEmail ? (
+        <ApplyRecommendForm categoryOptions={categoryOptions} contactEmail={contactEmail} />
+      ) : (
+        <p className="dark-panel p-5 text-sm leading-7 text-[var(--color-text-muted)]">
+          Recommendations are temporarily unavailable while our directory contact inbox is being configured.
+        </p>
+      )}
     </section>
   );
 }

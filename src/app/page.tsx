@@ -22,7 +22,7 @@ export default function HomePage() {
         charities={charities}
         categories={categories}
         title="Resource Finder"
-        description="Enter a location, set a radius, and filter results to find nearby food banks, nonprofits, and other local resources quickly."
+        description="Enter a covered city or ZIP, set a radius, and filter published organizations by ways to help and service area."
         showOpenPageLink
       />
 

@@ -3,7 +3,7 @@ import type { CharityOrganization } from "@/types/charity";
 const verificationFieldNotice =
   "Sample verification field only. No live watchdog rating is asserted.";
 
-export const charities: CharityOrganization[] = [
+const charityRecords: CharityOrganization[] = [
   {
     id: "charity-000",
     slug: "st-jude-childrens-research-hospital",
@@ -994,13 +994,6 @@ export const charities: CharityOrganization[] = [
         url: "https://workingbikes.org/contact-us/",
         updatedAt: "2026-05-18",
       },
-      {
-        source: "Working Bikes Donation Form",
-        label: "Federal ID number 54-2138339 is listed for donations",
-        status: "listed",
-        url: "https://workingbikes.org/wp-content/uploads/2020/11/Fillable-Monetary-Donation-Form.pdf",
-        updatedAt: "2026-05-18",
-      },
     ],
     ein: "54-2138339",
     status501c3:
@@ -1045,7 +1038,6 @@ export const charities: CharityOrganization[] = [
       donate: "https://www.aspca.org/ways-to-give",
       donationFaq: "https://www.aspca.org/about-us/faq",
       volunteer: "https://www.aspca.org/take-action/volunteer/safety-net-volunteer",
-      form990: "https://www.aspca.org/sites/default/files/aspca-form-990_fy2024.pdf",
     },
     social: {},
     waysToHelp: ["Donate", "Volunteer", "Events", "Remote"],
@@ -1062,13 +1054,6 @@ export const charities: CharityOrganization[] = [
         label: "Headquarters address and contact details are listed",
         status: "listed",
         url: "https://www.aspca.org/about-us/contact-us",
-        updatedAt: "2026-05-18",
-      },
-      {
-        source: "ASPCA Form 990",
-        label: "Current Form 990 PDF is published on official domain",
-        status: "listed",
-        url: "https://www.aspca.org/sites/default/files/aspca-form-990_fy2024.pdf",
         updatedAt: "2026-05-18",
       },
     ],
@@ -1410,3 +1395,6 @@ export const charities: CharityOrganization[] = [
       "Headquarters address and location fields follow public organization references for the Fairfield, Connecticut national office.",
   },
 ];
+
+// Sample records remain available to developers but are never published.
+export const charities = charityRecords.filter((charity) => !charity.sampleData);

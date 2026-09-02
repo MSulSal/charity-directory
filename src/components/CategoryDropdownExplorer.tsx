@@ -175,8 +175,6 @@ export function CategoryDropdownExplorer({
           const categoryCharities = charities.filter(
             (charity) => charity.categorySlug === category.slug,
           );
-          const realCount = categoryCharities.filter((charity) => !charity.sampleData).length;
-          const sampleCount = categoryCharities.filter((charity) => charity.sampleData).length;
 
           return (
             <details key={category.slug} className="dark-panel group" open={false}>
@@ -195,9 +193,7 @@ export function CategoryDropdownExplorer({
 
                 <div className="w-full text-left text-xs text-[var(--color-text-faint)] sm:w-auto sm:text-right">
                   <p>{category.subcategories.length} subcategories</p>
-                  <p>
-                    {categoryCharities.length} listings ({realCount} real, {sampleCount} sample)
-                  </p>
+                  <p>{categoryCharities.length} published listings</p>
                 </div>
               </summary>
 

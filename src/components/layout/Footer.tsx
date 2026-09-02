@@ -8,6 +8,8 @@ const footerLinks = [
   { href: "/submit-a-charity", label: "Apply / Recommend" },
   { href: "/resource-finder?verified=1", label: "Trust & Verification" },
   { href: "/contact", label: "Contact" },
+  { href: "/trust", label: "Trust & Verification" },
+  { href: "/privacy", label: "Privacy" },
 ];
 
 export function Footer() {
@@ -27,7 +29,7 @@ export function Footer() {
         </div>
 
         <p className="max-w-3xl text-xs leading-6 text-[var(--color-text-faint)]">
-          Charity Directory includes a mix of sample and live-source records while we expand coverage. Always review each organization profile, contact details, and verification fields before taking action.
+          Charity Directory publishes a limited, source-linked set of organization records. Review each organization&apos;s official website and current eligibility information before donating, volunteering, or seeking services. We are not an emergency service.
         </p>
       </div>
     </footer>

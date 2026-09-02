@@ -1,6 +1,6 @@
 # Charity Directory
 
-Charity Directory is a premium, modern discovery experience for charities and nonprofits. This initial release focuses on clear browsing, trust-oriented profile structure, and action-first calls to donate, volunteer, contact, and learn more.
+Charity Directory is a source-linked charity discovery experience for donors, volunteers, companies, and people looking for support. The launch dataset contains only published organization records with direct action links and structured trust fields.
 
 ## Project Overview
 
@@ -42,10 +42,14 @@ pnpm lint
 pnpm build
 ```
 
-## Environment Variables
+## Launch Configuration
 
-No map API key is required in the current build.  
-Maps are rendered with Leaflet.js + OpenStreetMap tiles.
+Copy `.env.example` to `.env.local` and set all three values before deploying:
+
+- `NEXT_PUBLIC_SITE_URL`: canonical public URL, without a trailing slash
+- `NEXT_PUBLIC_CONTACT_EMAIL`: public inbox for contact and recommendation drafts
+
+No map API key is required. Maps use Leaflet with CARTO map tiles. Resource Finder resolves covered city and ZIP locations from the published directory dataset; it does not send visitor address queries to a third-party geocoder.
 
 ## Current Features
 
@@ -58,7 +62,7 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
   - `/resource-finder`
   - Enter location and radius to find nearby charities
   - Filter by subcategory, ways to help, verified/listed, service scope, and population served
-  - Full-width Leaflet map panel with plotted result markers (no API key required)
+- Full-width Leaflet map panel with plotted published organization markers (no API key required)
   - Compact matched-organization list focused on map/routing context
 - Charity search results:
   - `/charities`
@@ -80,7 +84,7 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
   - `/submit-a-charity`
   - Form supports both recommendation submissions and nonprofit apply/claim requests
   - Captures organization details, category, location, notes, and optional evidence links
-  - Saves submissions locally in browser storage for this build and provides an email draft handoff option
+  - Opens a pre-filled email draft to the configured directory inbox; the site does not retain submission details
 - Reusable component architecture:
   - `Hero`, `SearchBar`, `AudienceActionChips`
   - `ResourceFinder`
@@ -90,7 +94,7 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
   - `FilterSidebar`
   - Shared `Layout` + `Header` + `Footer`
 - SEO foundation:
-  - Homepage metadata
+  - Homepage metadata, canonical URL support, Open Graph image, sitemap, and robots route
   - Category and listing metadata targeting discovery queries such as:
     - food charities near me
     - animal rescue charities
@@ -108,25 +112,25 @@ Maps are rendered with Leaflet.js + OpenStreetMap tiles.
 - `/charities`
 - `/charities/[slug]`
 
-Also includes placeholder utility pages linked in the footer:
+Also includes:
 
 - `/about`
 - `/for-nonprofits`
 - `/submit-a-charity` (active apply/recommend form)
 - `/contact`
+- `/trust`
+- `/privacy`
 
-## Data Notes (Important)
+## Data and Trust Notes
 
-- The dataset is currently a mix of prototype sample records and pilot real-data records.
-- No live watchdog ratings are claimed.
-- Verification-related values are modeled as structured fields so real integrations can be added later (for example: Charity Navigator, Candid/GuideStar, IRS nonprofit status, BBB Wise Giving Alliance).
+- Only records marked as real organization records are published. Development-only sample records are excluded from every public route and search flow.
+- No Charity Directory ratings are claimed. Watchdog and tax-status fields link to named sources when available.
+- Confirm program availability, eligibility, service boundaries, and donation details directly with each organization. The directory is not an emergency, crisis, or legal-advice service.
+- Before every content release, re-check every action link and update each record's `lastVerified` date.
 
 ## Future Roadmap
 
-- Real data ingestion pipeline for verified nonprofit records
-- Profile claim/update workflows for nonprofits
-- Stronger trust and audit trail UI (source timestamps, evidence links)
-- Geospatial discovery enhancements (distance/radius and map clustering)
-- User accounts and saved charities
-- Organization comparison and recommendation experiences
-- Accessibility audits and usability testing iterations
+- Expand the verified organization dataset and formalize a source-refresh cadence
+- Replace email-draft intake with a server-side reviewed submission workflow
+- Add monitoring, automated link checks, and browser accessibility tests in CI
+- Add richer geospatial coverage, map clustering, and authoritative program-availability data

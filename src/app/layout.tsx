@@ -2,9 +2,12 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
 import { SiteShell } from "@/components/layout/SiteShell";
+import { getConfiguredSiteUrl } from "@/lib/site";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
+
+const siteUrl = getConfiguredSiteUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -21,20 +24,29 @@ export const metadata: Metadata = {
     "local nonprofits",
     "donation opportunities",
   ],
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(siteUrl ?? "http://localhost:3000"),
   openGraph: {
     title: "Charity Directory",
     description:
       "Discover trusted nonprofits, donation links, volunteer options, and local help by cause and location.",
     type: "website",
+    url: siteUrl,
+  },
+  twitter: {
+    card: "summary",
+    title: "Charity Directory",
+    description:
+      "Discover source-linked nonprofits, donation options, volunteer opportunities, and local help by cause and location.",
+  },
+  robots: {
+    index: Boolean(siteUrl),
+    follow: Boolean(siteUrl),
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f5f1eb" },
     { media: "(prefers-color-scheme: dark)", color: "#0d0a12" },

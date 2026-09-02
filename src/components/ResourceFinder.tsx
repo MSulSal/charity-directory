@@ -935,7 +935,7 @@ export function ResourceFinder({
                         ? `${locationCenter.label} • ${activeRadiusMiles} mi radius`
                         : isGeocoding
                           ? "Looking up location..."
-                          : "Location not recognized. Try a nearby city, state, or ZIP."
+                          : "This location is not covered yet. Try a listed city, state, or ZIP."
                       : "Name/category search active across all mapped locations."}
                   </p>
                 ) : null}
@@ -1094,7 +1094,7 @@ export function ResourceFinder({
             !isGeocoding ? (
               <div className="pointer-events-none absolute inset-0 z-[1200] flex items-center justify-center px-6">
                 <p className="max-w-md border border-[var(--color-border)] bg-[var(--color-overlay-alert)] px-5 py-3 text-center text-sm text-[var(--color-text-faint)]">
-                  No location match found. Try a nearby city, state, or ZIP.
+                  This location is not covered yet. Try a listed city, state, or ZIP.
                 </p>
               </div>
             ) : null}

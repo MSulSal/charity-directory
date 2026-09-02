@@ -18,10 +18,10 @@ export function Hero() {
             Find trusted charities by cause, location, and ways to help.
           </h1>
           <p className="max-w-3xl text-base leading-8 text-[var(--color-text-muted)]">
-            Charity Directory helps donors, volunteers, companies, and people seeking support discover verified nonprofits, donation links, volunteer opportunities, contact details, and service areas in one place.
+            Charity Directory helps donors, volunteers, companies, and people seeking support discover published nonprofit profiles, donation links, volunteer opportunities, contact details, and service areas in one place.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-[var(--color-text-faint)]">
-            Find verified nonprofits, donation links, contact details, service areas, and ways to help - all in one place.
+            Find source-linked nonprofit profiles, donation links, contact details, service areas, and ways to help - all in one place.
           </p>
         </div>
 
