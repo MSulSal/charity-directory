@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
-import { useResolvedMapStyle } from "@/hooks/useResolvedMapStyle";
 import { MapLinkOptions } from "@/components/MapLinkOptions";
 import {
   geocodeLocationQuery,
@@ -13,7 +12,6 @@ import {
 import type { GeoPoint } from "@/lib/geo";
 import { buildMapLinks } from "@/lib/mapLinks";
 import { getLeafletTileConfig } from "@/lib/mapTheme";
-import type { MapStylePreference } from "@/lib/mapTheme";
 import type {
   Category,
   CharityOrganization,
@@ -38,12 +36,6 @@ interface ResourceFinderProps {
 }
 
 const radiusOptions = [5, 10, 25, 50, 100, 250, 500];
-const mapStyleOptions: Array<{ value: MapStylePreference; label: string }> = [
-  { value: "auto", label: "Auto (local time)" },
-  { value: "day", label: "Day map" },
-  { value: "night", label: "Night map" },
-];
-
 function isVetted(charity: CharityOrganization) {
   return charity.verificationBadges.some(
     (badge) => badge.status === "verified" || badge.status === "listed",
@@ -111,12 +103,6 @@ export function ResourceFinder({
   const [mapError, setMapError] = useState<string | null>(null);
   const [mobileResultsView, setMobileResultsView] = useState<"map" | "list">("map");
   const [isMapReady, setIsMapReady] = useState(false);
-  const {
-    preference: mapStylePreference,
-    resolvedStyle: resolvedMapStyle,
-    setPreference: setMapStylePreference,
-  } = useResolvedMapStyle();
-
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const tileLayerRef = useRef<import("leaflet").TileLayer | null>(null);
@@ -469,13 +455,12 @@ export function ResourceFinder({
       tileLayerRef.current = null;
     }
 
-    const tileConfig = getLeafletTileConfig(resolvedMapStyle);
+    const tileConfig = getLeafletTileConfig();
     tileLayerRef.current = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
-      subdomains: tileConfig.subdomains,
       maxZoom: tileConfig.maxZoom,
     }).addTo(map);
-  }, [isMapReady, resolvedMapStyle]);
+  }, [isMapReady]);
 
   useEffect(() => {
     const L = leafletRef.current;
@@ -1016,23 +1001,6 @@ export function ResourceFinder({
                         {populations.map((item) => (
                           <option key={item} value={item}>
                             {item}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className="text-xs text-[var(--color-text-muted)]">
-                      <span className="mb-2 block uppercase tracking-wide">Map style</span>
-                      <select
-                        value={mapStylePreference}
-                        onChange={(event) =>
-                          setMapStylePreference(event.target.value as MapStylePreference)
-                        }
-                        className="h-10 w-full border border-[var(--color-border)] bg-[var(--color-field-bg-strong)] px-2 text-sm text-[var(--color-text-strong)] outline-none focus:border-[var(--color-soft-amethyst)]"
-                      >
-                        {mapStyleOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
                           </option>
                         ))}
                       </select>

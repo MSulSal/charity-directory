@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { useResolvedMapStyle } from "@/hooks/useResolvedMapStyle";
 import { useIsIOSMobile } from "@/hooks/useIsIOSMobile";
 import { formatAddress } from "@/lib/format";
 import { buildMapLinks } from "@/lib/mapLinks";
@@ -24,7 +23,6 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
   const [mapError, setMapError] = useState<string | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const isIOSMobile = useIsIOSMobile();
-  const { resolvedStyle: resolvedMapStyle } = useResolvedMapStyle();
 
   const address = formatAddress(contact);
   const mapLinks = useMemo(
@@ -105,13 +103,12 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
       tileLayerRef.current = null;
     }
 
-    const tileConfig = getLeafletTileConfig(resolvedMapStyle);
+    const tileConfig = getLeafletTileConfig();
     tileLayerRef.current = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
-      subdomains: tileConfig.subdomains,
       maxZoom: tileConfig.maxZoom,
     }).addTo(map);
-  }, [isMapReady, resolvedMapStyle]);
+  }, [isMapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -163,7 +160,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
     return () => {
       window.clearTimeout(handle);
     };
-  }, [coordinates, resolvedMapStyle]);
+  }, [coordinates]);
 
   return (
     <section className="space-y-3" aria-label="Map preview">

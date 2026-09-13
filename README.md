@@ -49,7 +49,7 @@ Copy `.env.example` to `.env.local` and set all three values before deploying:
 - `NEXT_PUBLIC_SITE_URL`: canonical public URL, without a trailing slash
 - `NEXT_PUBLIC_CONTACT_EMAIL`: public inbox for contact and recommendation drafts
 
-No map API key is required. Maps use Leaflet with CARTO map tiles. Resource Finder resolves covered city and ZIP locations from the published directory dataset; it does not send visitor address queries to a third-party geocoder.
+No map API key is required. Maps use Leaflet with OpenStreetMap tiles and visible attribution. Resource Finder resolves covered city and ZIP locations from the published directory dataset; it does not send visitor address queries to a third-party geocoder.
 
 ## Current Features
 
