@@ -146,7 +146,7 @@ export function MapPreview({ charityName, contact, serviceArea }: MapPreviewProp
       .bindTooltip(charityName);
 
     map.fitBounds(focusCircle.getBounds(), { padding: [18, 18], maxZoom: 16 });
-  }, [charityName, coordinates]);
+  }, [charityName, coordinates, isMapReady]);
 
   useEffect(() => {
     if (!mapRef.current) {
