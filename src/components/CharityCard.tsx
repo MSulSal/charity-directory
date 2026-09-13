@@ -35,7 +35,9 @@ export function CharityCard({ charity, categoryName }: CharityCardProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-2">
           <p className="text-xs tracking-[0.15em] text-[var(--color-text-faint)] uppercase">
-            Organization profile
+            {charity.listingType === "local-resource"
+              ? "Source-linked local resource"
+              : "Organization profile"}
           </p>
           <h3 className="font-semibold text-2xl leading-tight text-[var(--color-text-strong)]">
             <Link

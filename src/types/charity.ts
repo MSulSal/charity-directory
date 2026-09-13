@@ -8,6 +8,8 @@ export type WayToHelp =
 
 export type ServiceScale = "Local" | "National" | "International";
 
+export type DirectoryListingType = "charity" | "local-resource";
+
 export type VerificationStatus =
   | "verified"
   | "listed"
@@ -66,6 +68,8 @@ export interface CharityOrganization {
   name: string;
   mission: string;
   sampleData: boolean;
+  /** Local resources are source-linked for discovery, not client-vetted endorsements. */
+  listingType?: DirectoryListingType;
   categorySlug: string;
   subcategories: string[];
   populationServed: string[];

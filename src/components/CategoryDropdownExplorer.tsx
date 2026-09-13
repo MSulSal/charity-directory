@@ -58,7 +58,11 @@ function CharityExpandedCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-[11px] tracking-[0.14em] text-[var(--color-text-faint)] uppercase">
-            {charity.sampleData ? "Sample charity record" : "Organization record"}
+            {charity.sampleData
+              ? "Sample charity record"
+              : charity.listingType === "local-resource"
+                ? "Source-linked local resource"
+                : "Organization record"}
           </p>
           <h4 className="text-xl font-semibold text-[var(--color-text-strong)]">
             <Link

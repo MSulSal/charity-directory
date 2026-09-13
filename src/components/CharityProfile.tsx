@@ -41,7 +41,11 @@ export function CharityProfile({
     <article className="mx-auto w-full max-w-7xl space-y-10 px-6 py-12 sm:px-8 lg:px-10 lg:py-16">
       <header className="dark-panel space-y-5 p-7 sm:p-10">
         <p className="text-xs tracking-[0.16em] text-[var(--color-text-faint)] uppercase">
-          {charity.sampleData ? "Sample charity profile" : "Organization profile"} / {category.name}
+          {charity.sampleData
+            ? "Sample charity profile"
+            : charity.listingType === "local-resource"
+              ? "Source-linked local resource"
+              : "Organization profile"} / {category.name}
         </p>
         <h1 className="font-semibold text-4xl leading-tight text-[var(--color-text-strong)] sm:text-5xl">
           {charity.name}
@@ -72,7 +76,9 @@ export function CharityProfile({
               Organization details
             </h2>
             <p className="text-sm text-[var(--color-text-muted)]">
-              Details are organized from the organization and linked public sources. Review the source links before taking action.
+              {charity.listingType === "local-resource"
+                ? "This resource is included from current public organization sources for local discovery. It is not a client-verified endorsement; review the linked source before taking action."
+                : "Details are organized from the organization and linked public sources. Review the source links before taking action."}
             </p>
           </div>
 
