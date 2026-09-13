@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CharityCatalog } from "@/components/CharityCatalog";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { categories, getCategoryBySlug, getCharitiesByCategory } from "@/data";
 import { filtersFromSearchParams } from "@/lib/filters";
+import { getBreadcrumbSchema, getCategoryCollectionSchema } from "@/lib/seo";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -15,8 +17,11 @@ export async function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+  searchParams,
+}: CategoryPageProps): Promise<Metadata> {
+  const [{ slug }, filters] = await Promise.all([params, searchParams]);
   const category = getCategoryBySlug(slug);
 
   if (!category) {
@@ -28,6 +33,17 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: category.name,
     description: `Browse ${category.name.toLowerCase()} charities, subcategories, local nonprofits, and donation opportunities.`,
+    alternates: { canonical: `/categories/${category.slug}` },
+    openGraph: {
+      title: `${category.name} Charities`,
+      description: category.shortDescription,
+      url: `/categories/${category.slug}`,
+    },
+    robots: Object.values(filters).some((value) =>
+      Array.isArray(value) ? value.some(Boolean) : Boolean(value),
+    )
+      ? { index: false, follow: true }
+      : undefined,
   };
 }
 
@@ -44,9 +60,18 @@ export default async function CategoryDetailPage({
 
   const charitiesInCategory = getCharitiesByCategory(category.slug);
   const initialFilters = filtersFromSearchParams(resolvedSearchParams);
+  const schemas = [
+    getCategoryCollectionSchema(category),
+    getBreadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Categories", path: "/categories" },
+      { name: category.name, path: `/categories/${category.slug}` },
+    ]),
+  ].filter(Boolean) as Record<string, unknown>[];
 
   return (
     <>
+      {schemas.length > 0 ? <JsonLd data={schemas} /> : null}
       <section className="mx-auto w-full max-w-7xl space-y-6 px-6 py-12 sm:px-8 lg:px-10 lg:py-16">
         <p className="text-xs tracking-[0.16em] text-[var(--color-text-faint)] uppercase">Category detail</p>
         <h1 className="font-semibold text-4xl leading-tight text-[var(--color-text-strong)] sm:text-5xl">

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Trust & Verification",
-  description: "How Charity Directory presents organization details and source-linked trust fields.",
+  description: "How Conrad's Charities presents organization details and source-linked trust fields.",
+  alternates: { canonical: "/trust" },
 };
 
 export default function TrustPage() {
@@ -11,10 +12,10 @@ export default function TrustPage() {
       <h1 className="text-4xl font-semibold text-[var(--color-text-strong)] sm:text-5xl">Trust & Verification</h1>
       <div className="dark-panel space-y-5 p-6 text-sm leading-7 text-[var(--color-text-muted)]">
         <p>
-          Published profiles include direct organization links and, when available, structured fields for EINs, 501(c)(3) status, Form 990 documents, and watchdog listings. A listed source is not a Charity Directory rating or endorsement.
+          Published profiles include direct organization links and, when available, structured fields for EINs, 501(c)(3) status, Form 990 documents, and watchdog listings. A listed source is not a Conrad&apos;s Charities rating or endorsement.
         </p>
         <p>
-          Information can change. Confirm donation eligibility, program availability, hours, and service boundaries with the organization before acting. Charity Directory is not an emergency, crisis, or legal-advice service.
+          Information can change. Confirm donation eligibility, program availability, hours, and service boundaries with the organization before acting. Conrad&apos;s Charities is not an emergency, crisis, or legal-advice service.
         </p>
         <p>
           Report a correction or recommend an organization through Apply / Recommend. We review proposed updates before publishing them.

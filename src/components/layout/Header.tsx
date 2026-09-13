@@ -20,7 +20,7 @@ export function Header() {
     <header className="sticky top-0 z-[2000] border-b border-[var(--color-border-soft)] bg-[var(--color-header-bg)] text-[var(--color-text-strong)] backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-8 lg:px-10">
         <Link href="/" className="text-base font-semibold tracking-[0.12em] uppercase sm:text-lg">
-          Charity Directory
+          Conrad&apos;s Charities
         </Link>
 
         <button

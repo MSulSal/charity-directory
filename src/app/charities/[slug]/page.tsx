@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CharityProfile } from "@/components/CharityProfile";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   charities,
   getCategoryBySlug,
   getCharityBySlug,
   getRelatedCharities,
 } from "@/data";
+import { getBreadcrumbSchema, getCharitySchema } from "@/lib/seo";
 
 interface CharityPageProps {
   params: Promise<{ slug: string }>;
@@ -28,6 +30,12 @@ export async function generateMetadata({ params }: CharityPageProps): Promise<Me
   return {
     title: charity.name,
     description: `${charity.name} profile with mission, location, donation fields, volunteer options, and trust metadata.`,
+    alternates: { canonical: `/charities/${charity.slug}` },
+    openGraph: {
+      title: charity.name,
+      description: charity.mission,
+      url: `/charities/${charity.slug}`,
+    },
   };
 }
 
@@ -45,8 +53,19 @@ export default async function CharityProfilePage({ params }: CharityPageProps) {
   }
 
   const related = getRelatedCharities(charity, 3);
+  const schemas = [
+    getCharitySchema(charity),
+    getBreadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Charities", path: "/charities" },
+      { name: charity.name, path: `/charities/${charity.slug}` },
+    ]),
+  ].filter(Boolean) as Record<string, unknown>[];
 
   return (
-    <CharityProfile charity={charity} category={category} relatedCharities={related} />
+    <>
+      {schemas.length > 0 ? <JsonLd data={schemas} /> : null}
+      <CharityProfile charity={charity} category={category} relatedCharities={related} />
+    </>
   );
 }

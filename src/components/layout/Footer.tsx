@@ -6,7 +6,6 @@ const footerLinks = [
   { href: "/categories", label: "Categories" },
   { href: "/for-nonprofits", label: "For Nonprofits" },
   { href: "/submit-a-charity", label: "Apply / Recommend" },
-  { href: "/resource-finder?verified=1", label: "Trust & Verification" },
   { href: "/contact", label: "Contact" },
   { href: "/trust", label: "Trust & Verification" },
   { href: "/privacy", label: "Privacy" },
@@ -29,7 +28,7 @@ export function Footer() {
         </div>
 
         <p className="max-w-3xl text-xs leading-6 text-[var(--color-text-faint)]">
-          Charity Directory publishes a limited, source-linked set of organization records. Review each organization&apos;s official website and current eligibility information before donating, volunteering, or seeking services. We are not an emergency service.
+          Conrad&apos;s Charities publishes a limited, source-linked set of organization records. Review each organization&apos;s official website and current eligibility information before donating, volunteering, or seeking services. We are not an emergency service.
         </p>
       </div>
     </footer>

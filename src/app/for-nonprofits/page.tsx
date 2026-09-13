@@ -4,7 +4,8 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "For Nonprofits",
   description:
-    "Information for nonprofits that want to claim a profile or submit listing updates in Charity Directory.",
+    "Information for nonprofits that want to claim a profile or submit listing updates in Conrad's Charities.",
+  alternates: { canonical: "/for-nonprofits" },
 };
 
 export default function ForNonprofitsPage() {

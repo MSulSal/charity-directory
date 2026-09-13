@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Charity Directory";
+export const alt = "Conrad's Charities";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -21,7 +21,7 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ color: "#e8be4b", fontSize: 28, letterSpacing: 8, textTransform: "uppercase" }}>
-          Charity Directory
+          Conrad&apos;s Charities
         </div>
         <div style={{ fontSize: 76, fontWeight: 700, lineHeight: 1.08, marginTop: 34, textAlign: "center" }}>
           Find charities by cause, location, and ways to help.

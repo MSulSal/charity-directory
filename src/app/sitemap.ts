@@ -15,14 +15,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/trust",
     "/privacy",
   ];
-  const urls = [
-    ...paths,
-    ...categories.map((category) => `/categories/${category.slug}`),
-    ...charities.map((charity) => `/charities/${charity.slug}`),
-  ];
-
-  return urls.flatMap((path) => {
+  const staticEntries = paths.flatMap((path) => {
     const url = getAbsoluteUrl(path);
-    return url ? [{ url, lastModified: new Date() }] : [];
+    return url ? [{ url, changeFrequency: "weekly" as const, priority: path === "/" ? 1 : 0.7 }] : [];
   });
+  const categoryEntries = categories.flatMap((category) => {
+    const url = getAbsoluteUrl(`/categories/${category.slug}`);
+    return url ? [{ url, changeFrequency: "weekly" as const, priority: 0.8 }] : [];
+  });
+  const charityEntries = charities.flatMap((charity) => {
+    const url = getAbsoluteUrl(`/charities/${charity.slug}`);
+    return url
+      ? [{
+          url,
+          lastModified: new Date(charity.lastVerified),
+          changeFrequency: "monthly" as const,
+          priority: 0.9,
+        }]
+      : [];
+  });
+
+  return [...staticEntries, ...categoryEntries, ...charityEntries];
 }

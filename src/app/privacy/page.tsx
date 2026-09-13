@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "How Charity Directory handles information used while you browse the directory.",
+  description: "How Conrad's Charities handles information used while you browse the directory.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
@@ -11,7 +12,7 @@ export default function PrivacyPage() {
       <h1 className="text-4xl font-semibold text-[var(--color-text-strong)] sm:text-5xl">Privacy</h1>
       <div className="dark-panel space-y-5 p-6 text-sm leading-7 text-[var(--color-text-muted)]">
         <p>
-          Charity Directory does not require an account and does not sell personal information. Resource Finder resolves locations from the directory&apos;s covered locations; it does not send your search to a third-party geocoding provider. Maps use OpenStreetMap tiles with visible OpenStreetMap attribution.
+          Conrad&apos;s Charities does not require an account and does not sell personal information. Resource Finder resolves locations from the directory&apos;s covered locations; it does not send your search to a third-party geocoding provider. Maps use OpenStreetMap tiles with visible OpenStreetMap attribution.
         </p>
         <p>
           When you use Apply / Recommend, this site opens a draft in your email application. The information in that draft is sent only if you choose to send the email; it is not stored by this website.

@@ -8,12 +8,6 @@ interface ResourceFinderPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export const metadata: Metadata = {
-  title: "Resource Finder",
-  description:
-    "Find published charity profiles within a selected radius of a covered city or ZIP, then narrow by cause and ways to help.",
-};
-
 function firstValue(value: string | string[] | undefined) {
   if (Array.isArray(value)) {
     return value[0] || "";
@@ -58,6 +52,23 @@ function parseScale(value: string): ServiceScale | "" {
 
 function parseBoolean(value: string) {
   return value === "1" || value.toLowerCase() === "true" || value.toLowerCase() === "yes";
+}
+
+export async function generateMetadata({
+  searchParams,
+}: ResourceFinderPageProps): Promise<Metadata> {
+  const filters = await searchParams;
+  const hasFilters = Object.values(filters).some((value) =>
+    Array.isArray(value) ? value.some(Boolean) : Boolean(value),
+  );
+
+  return {
+    title: "Resource Finder",
+    description:
+      "Find published charity profiles within a selected radius of a covered city or ZIP, then narrow by cause and ways to help.",
+    alternates: { canonical: "/resource-finder" },
+    robots: hasFilters ? { index: false, follow: true } : undefined,
+  };
 }
 
 export default async function ResourceFinderPage({

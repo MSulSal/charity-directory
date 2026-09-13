@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Charity Categories",
   description:
     "Browse charity categories including food support, mental health, animal rescue, education, legal aid, and local nonprofit services.",
+  alternates: { canonical: "/categories" },
 };
 
 export default function CategoriesPage() {

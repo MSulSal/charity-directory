@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact the Charity Directory team about a listing, correction, or partnership.",
+  description: "Contact the Conrad's Charities team about a listing, correction, or partnership.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

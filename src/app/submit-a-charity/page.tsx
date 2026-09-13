@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Apply or Recommend a Charity",
   description:
     "Submit a recommendation for a charity listing or apply to claim and update an organization profile.",
+  alternates: { canonical: "/submit-a-charity" },
 };
 
 export default function SubmitCharityPage() {

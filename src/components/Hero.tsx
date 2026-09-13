@@ -12,13 +12,13 @@ export function Hero() {
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 py-16 sm:px-8 lg:px-10 lg:py-24">
         <div className="max-w-4xl space-y-5">
           <p className="text-xs tracking-[0.18em] text-[var(--color-soft-amethyst)] uppercase">
-            Charity Directory
+            Conrad&apos;s Charities
           </p>
           <h1 className="font-semibold text-4xl leading-tight sm:text-5xl lg:text-6xl">
             Find trusted charities by cause, location, and ways to help.
           </h1>
           <p className="max-w-3xl text-base leading-8 text-[var(--color-text-muted)]">
-            Charity Directory helps donors, volunteers, companies, and people seeking support discover published nonprofit profiles, donation links, volunteer opportunities, contact details, and service areas in one place.
+            Conrad&apos;s Charities helps donors, volunteers, companies, and people seeking support discover published nonprofit profiles, donation links, volunteer opportunities, contact details, and service areas in one place.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-[var(--color-text-faint)]">
             Find source-linked nonprofit profiles, donation links, contact details, service areas, and ways to help - all in one place.

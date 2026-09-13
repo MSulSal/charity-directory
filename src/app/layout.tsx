@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
 import { SiteShell } from "@/components/layout/SiteShell";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 import { getConfiguredSiteUrl } from "@/lib/site";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 import "leaflet/dist/leaflet.css";
@@ -11,11 +12,11 @@ const siteUrl = getConfiguredSiteUrl();
 
 export const metadata: Metadata = {
   title: {
-    default: "Charity Directory - Find Trusted Charities by Cause and Location",
-    template: "%s | Charity Directory",
+    default: "Conrad's Charities | Find Charities by Cause and Location",
+    template: "%s | Conrad's Charities",
   },
-  description:
-    "Find trusted charities, nonprofits, donation links, volunteer opportunities, and local help by cause, location, and ways to give.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     "food charities near me",
     "animal rescue charities",
@@ -26,21 +27,29 @@ export const metadata: Metadata = {
   ],
   metadataBase: new URL(siteUrl ?? "http://localhost:3000"),
   openGraph: {
-    title: "Charity Directory",
-    description:
-      "Discover trusted nonprofits, donation links, volunteer options, and local help by cause and location.",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     type: "website",
-    url: siteUrl,
+    url: "/",
+    siteName: SITE_NAME,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary",
-    title: "Charity Directory",
-    description:
-      "Discover source-linked nonprofits, donation options, volunteer opportunities, and local help by cause and location.",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
   robots: {
     index: Boolean(siteUrl),
     follow: Boolean(siteUrl),
+    googleBot: {
+      index: Boolean(siteUrl),
+      follow: Boolean(siteUrl),
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

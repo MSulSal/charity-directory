@@ -1,6 +1,6 @@
-# Charity Directory
+# Conrad's Charities
 
-Charity Directory is a source-linked charity discovery experience for donors, volunteers, companies, and people looking for support. The launch dataset contains only published organization records with direct action links and structured trust fields.
+Conrad's Charities is a source-linked charity discovery experience for donors, volunteers, companies, and people looking for support. The launch dataset contains only published organization records with direct action links and structured trust fields.
 
 ## Project Overview
 
@@ -124,7 +124,7 @@ Also includes:
 ## Data and Trust Notes
 
 - Only records marked as real organization records are published. Development-only sample records are excluded from every public route and search flow.
-- No Charity Directory ratings are claimed. Watchdog and tax-status fields link to named sources when available.
+- No Conrad's Charities ratings are claimed. Watchdog and tax-status fields link to named sources when available.
 - Confirm program availability, eligibility, service boundaries, and donation details directly with each organization. The directory is not an emergency, crisis, or legal-advice service.
 - Before every content release, re-check every action link and update each record's `lastVerified` date.
 

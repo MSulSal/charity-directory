@@ -3,19 +3,25 @@ import type { Metadata } from "next";
 import { CategoryDropdownExplorer } from "@/components/CategoryDropdownExplorer";
 import { Hero } from "@/components/Hero";
 import { ResourceFinder } from "@/components/ResourceFinder";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { categories, charities } from "@/data";
+import { SITE_DESCRIPTION, SITE_NAME, getWebSiteSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Charity Directory - Find Trusted Charities by Cause and Location",
+    absolute: "Conrad's Charities | Find Charities by Cause and Location",
   },
-  description:
-    "Find trusted charities, nonprofits, donation links, volunteer opportunities, and local help by cause, location, and ways to give.",
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: { title: SITE_NAME, description: SITE_DESCRIPTION, url: "/" },
 };
 
 export default function HomePage() {
+  const websiteSchema = getWebSiteSchema();
+
   return (
     <>
+      {websiteSchema ? <JsonLd data={websiteSchema} /> : null}
       <Hero />
 
       <ResourceFinder

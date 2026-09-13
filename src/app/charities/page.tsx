@@ -8,11 +8,22 @@ interface CharitiesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export const metadata: Metadata = {
-  title: "Search Charities",
-  description:
-    "Search charities and nonprofits by cause, location, trust filters, and ways to help.",
-};
+export async function generateMetadata({
+  searchParams,
+}: CharitiesPageProps): Promise<Metadata> {
+  const filters = await searchParams;
+  const hasFilters = Object.values(filters).some((value) =>
+    Array.isArray(value) ? value.some(Boolean) : Boolean(value),
+  );
+
+  return {
+    title: "Search Charities",
+    description:
+      "Search charities and nonprofits by cause, location, trust filters, and ways to help.",
+    alternates: { canonical: "/charities" },
+    robots: hasFilters ? { index: false, follow: true } : undefined,
+  };
+}
 
 export default async function CharitiesPage({
   searchParams,
