@@ -616,6 +616,7 @@ export function ResourceFinder({
     hasActiveLocationText,
     hasActiveStartPoint,
     hasSearched,
+    isMapReady,
     locationCenter,
     mappableResults,
     startDistanceByCharityId,
