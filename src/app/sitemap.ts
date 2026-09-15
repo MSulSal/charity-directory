@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 
-import { categories, charities } from "@/data";
+import { categories, charities, getLocalResourceLocations } from "@/data";
 import { getAbsoluteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
     "/about",
+    "/contact",
     "/categories",
     "/charities",
     "/resource-finder",
@@ -35,5 +36,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       : [];
   });
 
-  return [...staticEntries, ...categoryEntries, ...charityEntries];
+  const locationEntries = getLocalResourceLocations().flatMap((location) => {
+    const url = getAbsoluteUrl(`/locations/${location.slug}`);
+    return url
+      ? [{
+          url,
+          lastModified: new Date(location.lastModified),
+          changeFrequency: "weekly" as const,
+          priority: 0.8,
+        }]
+      : [];
+  });
+
+  return [...staticEntries, ...categoryEntries, ...locationEntries, ...charityEntries];
 }

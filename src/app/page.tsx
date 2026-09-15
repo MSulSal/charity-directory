@@ -5,11 +5,16 @@ import { Hero } from "@/components/Hero";
 import { ResourceFinder } from "@/components/ResourceFinder";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { categories, charities } from "@/data";
-import { SITE_DESCRIPTION, SITE_NAME, getWebSiteSchema } from "@/lib/seo";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  getDirectoryOrganizationSchema,
+  getWebSiteSchema,
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Conrad's Charities | Find Charities by Cause and Location",
+    absolute: "Conrad's Charities | Find Local Charities, Food Banks & Help",
   },
   description: SITE_DESCRIPTION,
   alternates: { canonical: "/" },
@@ -18,10 +23,12 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   const websiteSchema = getWebSiteSchema();
+  const organizationSchema = getDirectoryOrganizationSchema();
+  const schemas = [websiteSchema, organizationSchema].filter(Boolean) as Record<string, unknown>[];
 
   return (
     <>
-      {websiteSchema ? <JsonLd data={websiteSchema} /> : null}
+      {schemas.length > 0 ? <JsonLd data={schemas} /> : null}
       <Hero />
 
       <ResourceFinder

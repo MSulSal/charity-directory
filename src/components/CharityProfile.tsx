@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { MapPreview } from "@/components/MapPreview";
 import { VerificationBadges } from "@/components/VerificationBadges";
+import { getLocalResourceLocationSlug } from "@/data";
 import { formatAddress, formatDate } from "@/lib/format";
 import type { Category, CharityOrganization } from "@/types/charity";
 
@@ -37,6 +38,8 @@ export function CharityProfile({
   category,
   relatedCharities,
 }: CharityProfileProps) {
+  const localResourceLocationSlug = getLocalResourceLocationSlug(charity);
+
   return (
     <article className="mx-auto w-full max-w-7xl space-y-10 px-6 py-12 sm:px-8 lg:px-10 lg:py-16">
       <header className="dark-panel space-y-5 p-7 sm:p-10">
@@ -101,6 +104,19 @@ export function CharityProfile({
                 {charity.serviceScale} / {charity.serviceArea}
               </dd>
             </div>
+            {localResourceLocationSlug ? (
+              <div>
+                <dt className="font-semibold text-[var(--color-text-strong)]">Local resource coverage</dt>
+                <dd>
+                  <Link
+                    href={`/locations/${localResourceLocationSlug}`}
+                    className="underline decoration-[var(--color-border)] underline-offset-2 hover:decoration-[var(--color-soft-amethyst)]"
+                  >
+                    Browse {charity.contact.city}, {charity.contact.state} resources
+                  </Link>
+                </dd>
+              </div>
+            ) : null}
             <div>
               <dt className="font-semibold text-[var(--color-text-strong)]">Contact info</dt>
               <dd>

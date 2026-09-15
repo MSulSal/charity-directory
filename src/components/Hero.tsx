@@ -15,10 +15,10 @@ export function Hero() {
             Conrad&apos;s Charities
           </p>
           <h1 className="font-semibold text-4xl leading-tight sm:text-5xl lg:text-6xl">
-            Find trusted charities by cause, location, and ways to help.
+            Find charities and local help by cause, location, and ways to give.
           </h1>
           <p className="max-w-3xl text-base leading-8 text-[var(--color-text-muted)]">
-            Conrad&apos;s Charities helps donors, volunteers, companies, and people seeking support discover published nonprofit profiles, donation links, volunteer opportunities, contact details, and service areas in one place.
+            Conrad&apos;s Charities helps donors, volunteers, companies, and people seeking support discover source-linked nonprofit profiles, food banks, donation links, volunteer opportunities, contact details, and service areas in one place.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-[var(--color-text-faint)]">
             Find source-linked nonprofit profiles, donation links, contact details, service areas, and ways to help - all in one place.

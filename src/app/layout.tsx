@@ -12,7 +12,7 @@ const siteUrl = getConfiguredSiteUrl();
 
 export const metadata: Metadata = {
   title: {
-    default: "Conrad's Charities | Find Charities by Cause and Location",
+    default: "Conrad's Charities | Find Local Charities, Food Banks & Help",
     template: "%s | Conrad's Charities",
   },
   description: SITE_DESCRIPTION,

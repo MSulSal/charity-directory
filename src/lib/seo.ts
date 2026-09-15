@@ -3,7 +3,7 @@ import type { Category, CharityOrganization } from "@/types/charity";
 
 export const SITE_NAME = "Conrad's Charities";
 export const SITE_DESCRIPTION =
-  "Find source-linked charities, nonprofit profiles, donation links, volunteer opportunities, and local help by cause and location.";
+  "Find local charities, food banks, nonprofit services, donation links, volunteer opportunities, and help by cause, location, and ways to give.";
 
 function withoutEmptyValues<T extends Record<string, unknown>>(value: T) {
   return Object.fromEntries(
@@ -25,6 +25,7 @@ export function getWebSiteSchema() {
     alternateName: "ConradsCharities.org",
     url: siteUrl,
     description: SITE_DESCRIPTION,
+    publisher: { "@id": `${siteUrl}/#organization` },
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -33,6 +34,24 @@ export function getWebSiteSchema() {
       },
       "query-input": "required name=search_term_string",
     },
+  };
+}
+
+export function getDirectoryOrganizationSchema() {
+  const siteUrl = getConfiguredSiteUrl();
+  if (!siteUrl) {
+    return null;
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
+    name: SITE_NAME,
+    alternateName: "ConradsCharities.org",
+    url: siteUrl,
+    logo: `${siteUrl}/icon.svg`,
+    description: SITE_DESCRIPTION,
   };
 }
 
@@ -77,6 +96,34 @@ export function getCategoryCollectionSchema(category: Category) {
   };
 }
 
+export function getLocationCollectionSchema({
+  city,
+  state,
+  path,
+  resourceCount,
+}: {
+  city: string;
+  state: string;
+  path: string;
+  resourceCount: number;
+}) {
+  const url = getAbsoluteUrl(path);
+  const siteUrl = getConfiguredSiteUrl();
+  if (!url || !siteUrl) {
+    return null;
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${city}, ${state} Local Resources`,
+    description: `Source-linked local help in ${city}, ${state}, including ${resourceCount} published resource profiles.`,
+    url,
+    isPartOf: { "@id": `${siteUrl}/#website` },
+    about: { "@type": "City", name: city, address: { "@type": "PostalAddress", addressRegion: state } },
+  };
+}
+
 export function getCharitySchema(charity: CharityOrganization) {
   const url = getAbsoluteUrl(`/charities/${charity.slug}`);
   if (!url) {
@@ -89,7 +136,7 @@ export function getCharitySchema(charity: CharityOrganization) {
     addressLocality: charity.contact.city,
     addressRegion: charity.contact.state,
     postalCode: charity.contact.postalCode,
-    addressCountry: charity.contact.country,
+    addressCountry: charity.contact.country === "USA" ? "US" : charity.contact.country,
   });
   const geo =
     charity.contact.latitude !== undefined && charity.contact.longitude !== undefined
@@ -99,19 +146,22 @@ export function getCharitySchema(charity: CharityOrganization) {
           longitude: charity.contact.longitude,
         }
       : undefined;
-  const sameAs = Object.values(charity.social).filter(Boolean);
+  const sameAs = [charity.links.website, ...Object.values(charity.social)].filter(Boolean);
+  const taxId = /^\d{2}-?\d{7}$/.test(charity.ein) ? charity.ein : undefined;
 
   return withoutEmptyValues({
     "@context": "https://schema.org",
     "@type": ["Organization", "NGO"],
+    "@id": `${url}#organization`,
     name: charity.name,
     description: charity.mission,
-    url,
+    url: charity.links.website || url,
+    mainEntityOfPage: url,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
     address: Object.keys(address).length > 1 ? address : undefined,
     geo,
     telephone: charity.contact.phone,
     email: charity.contact.email,
-    taxID: charity.ein,
+    taxID: taxId,
   });
 }
